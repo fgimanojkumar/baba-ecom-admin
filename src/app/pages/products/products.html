@@ -1,0 +1,731 @@
+<div class="container-fluid px-3 px-lg-4 py-4">
+    <!-- PAGE HEADING -->
+    <div class="page-heading">
+        <div class="page-heading-copy">
+            <span class="page-icon"><i class="bi bi-box-seam" aria-hidden="true"></i></span>
+            <div>
+                <h1 class="h5 mb-1">Products</h1>
+                <p class="text-muted mb-0">Manage your product inventory, including pricing, stock, and more.</p>
+            </div>
+        </div>
+        <div class="heading-actions">
+            <!-- <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#PRODUCTMODEL"
+                (click)="openAddModal()">
+                <i class="bi bi-plus-circle" aria-hidden="true"></i>
+                Add New Product
+            </button> -->
+            <button class="btn btn-success btn-sm" (click)="openAdd()">
+                <i class="bi bi-plus-circle" aria-hidden="true"></i>
+                Add New Product
+            </button>
+        </div>
+    </div>
+
+
+
+
+
+
+
+
+
+    <!-- manage and view product start here  -->
+    @if(isView()){
+    <section class="whiteBg mb-4">
+        <ul class="nav nav-tabs" role="tablist">
+
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="active-tab" data-bs-toggle="tab" data-bs-target="#active-tab-pane"
+                    type="button" role="tab" aria-controls="active-tab-pane" aria-selected="false">Active</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="inactive-tab" data-bs-toggle="tab" data-bs-target="#inactive-tab-pane"
+                    type="button" role="tab" aria-controls="inactive-tab-pane" aria-selected="false">Inactive</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="draft-tab" data-bs-toggle="tab" data-bs-target="#draft-tab-pane"
+                    type="button" role="tab" aria-controls="draft-tab-pane" aria-selected="false">Draft</button>
+            </li>
+
+        </ul>
+
+        <div class="tab-content border border-top-0 p-3">
+
+            <div class="tab-pane fade show active" id="active-tab-pane" role="tabpanel" aria-labelledby="active-tab"
+                tabindex="0">
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th scope="col">Product</th>
+                                <th scope="col">SKU</th>
+                                <th scope="col">Price</th>
+                                <th scope="col">Stock</th>
+                                <th scope="col">Status</th>
+                                <th scope="col" class="text-end">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (product of products(); track product.id()) {
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <img class="avatar-img avatar-sm"
+                                            [src]="product.images()?.[0]?.url || 'assets/images/avatar/avatar-fallback.jpg'"
+                                            [alt]="product.name()">
+                                        <div>
+                                            <p class="fw-semibold mb-0">{{ product.name() }}</p>
+                                            <p class="text-muted small mb-0">{{ product.category().name }}</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>{{ product.sku() }}</td>
+                                <td>{{ product.price().sellingPrice | currency:product.price().currency }}</td>
+                                <td>{{ product.inventory().stock }}</td>
+                                <td>
+                                    <span class="badge"
+                                        [ngClass]="{'text-bg-success': product.status() === 'ACTIVE', 'text-bg-warning': product.status() === 'DRAFT', 'text-bg-danger': product.status() === 'INACTIVE'}">
+                                        {{ product.status() }}
+                                    </span>
+                                </td>
+                                <td class="text-end">
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-info dropdown-toggle btn-sm"
+                                            data-bs-toggle="dropdown" aria-expanded="false">Action</button>
+                                        <ul class="dropdown-menu">
+                                            <li><a class="dropdown-item" data-bs-toggle="modal"
+                                                    data-bs-target="#PRODUCTMODEL"
+                                                    (click)="openEditModal(product)">Edit</a></li>
+                                            <li><a class="dropdown-item" href="javascript:void(0)"
+                                                    (click)="deleteProduct(product.id())">Delete</a></li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                            } @empty {
+                            <tr>
+                                <td colspan="6" class="text-center text-muted">No products found. Click "Add New
+                                    Product" to get
+                                    started.</td>
+                            </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="tab-pane fade show" id="inactive-tab-pane" role="tabpanel" aria-labelledby="inactive-tab"
+                tabindex="0">
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th scope="col">Product</th>
+                                <th scope="col">SKU</th>
+                                <th scope="col">Price</th>
+                                <th scope="col">Stock</th>
+                                <th scope="col">Status</th>
+                                <th scope="col" class="text-end">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (product of products(); track product.id()) {
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <img class="avatar-img avatar-sm"
+                                            [src]="product.images()?.[0]?.url || 'assets/images/avatar/avatar-fallback.jpg'"
+                                            [alt]="product.name()">
+                                        <div>
+                                            <p class="fw-semibold mb-0">{{ product.name() }}</p>
+                                            <p class="text-muted small mb-0">{{ product.category().name }}</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>{{ product.sku() }}</td>
+                                <td>{{ product.price().sellingPrice | currency:product.price().currency }}</td>
+                                <td>{{ product.inventory().stock }}</td>
+                                <td>
+                                    <span class="badge"
+                                        [ngClass]="{'text-bg-success': product.status() === 'ACTIVE', 'text-bg-warning': product.status() === 'DRAFT', 'text-bg-danger': product.status() === 'INACTIVE'}">
+                                        {{ product.status() }}
+                                    </span>
+                                </td>
+                                <td class="text-end">
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-info dropdown-toggle btn-sm"
+                                            data-bs-toggle="dropdown" aria-expanded="false">Action</button>
+                                        <ul class="dropdown-menu">
+                                            <li><a class="dropdown-item" data-bs-toggle="modal"
+                                                    data-bs-target="#PRODUCTMODEL"
+                                                    (click)="openEditModal(product)">Edit</a></li>
+                                            <li><a class="dropdown-item" href="javascript:void(0)"
+                                                    (click)="deleteProduct(product.id())">Delete</a></li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                            } @empty {
+                            <tr>
+                                <td colspan="6" class="text-center text-muted">No products found. Click "Add New
+                                    Product" to get
+                                    started.</td>
+                            </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="tab-pane fade show" id="draft-tab-pane" role="tabpanel" aria-labelledby="draft-tab"
+                tabindex="0">
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th scope="col">Product</th>
+                                <th scope="col">SKU</th>
+                                <th scope="col">Price</th>
+                                <th scope="col">Stock</th>
+                                <th scope="col">Status</th>
+                                <th scope="col" class="text-end">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (product of products(); track product.id()) {
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <img class="avatar-img avatar-sm"
+                                            [src]="product.images()?.[0]?.url || 'assets/images/avatar/avatar-fallback.jpg'"
+                                            [alt]="product.name()">
+                                        <div>
+                                            <p class="fw-semibold mb-0">{{ product.name() }}</p>
+                                            <p class="text-muted small mb-0">{{ product.category().name }}</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>{{ product.sku() }}</td>
+                                <td>{{ product.price().sellingPrice | currency:product.price().currency }}</td>
+                                <td>{{ product.inventory().stock }}</td>
+                                <td>
+                                    <span class="badge"
+                                        [ngClass]="{'text-bg-success': product.status() === 'ACTIVE', 'text-bg-warning': product.status() === 'DRAFT', 'text-bg-danger': product.status() === 'INACTIVE'}">
+                                        {{ product.status() }}
+                                    </span>
+                                </td>
+                                <td class="text-end">
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-info dropdown-toggle btn-sm"
+                                            data-bs-toggle="dropdown" aria-expanded="false">Action</button>
+                                        <ul class="dropdown-menu">
+                                            <li><a class="dropdown-item" data-bs-toggle="modal"
+                                                    data-bs-target="#PRODUCTMODEL"
+                                                    (click)="openEditModal(product)">Edit</a></li>
+                                            <li><a class="dropdown-item" href="javascript:void(0)"
+                                                    (click)="deleteProduct(product.id())">Delete</a></li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                            } @empty {
+                            <tr>
+                                <td colspan="6" class="text-center text-muted">No products found. Click "Add New
+                                    Product" to get
+                                    started.</td>
+                            </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+    </section>
+    }
+    <!-- manage and view product end here  -->
+
+
+
+    <!-- add new product start here  -->
+    @if(isAddNewProduct()){
+    <section class="whiteBg mb-4">
+        <div class="row">
+            <div class="col-8">
+                <form [formGroup]="productForm" (ngSubmit)="saveProduct()">
+                    <!-- <div class="modal-header">
+                        <h5 class="modal-title">{{ isEditMode() ? 'Edit Product' : 'Add New Product' }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div> -->
+                    <div class="modal-body">
+                        <ul class="nav nav-tabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="general-tab" data-bs-toggle="tab"
+                                    data-bs-target="#general-tab-pane" type="button" role="tab"
+                                    aria-controls="general-tab-pane" aria-selected="true">General</button>
+                            </li>
+                            <li class="nav-item" role="presentation"><button class="nav-link" id="pricing-tab"
+                                    data-bs-toggle="tab" data-bs-target="#pricing-tab-pane" type="button" role="tab"
+                                    aria-controls="pricing-tab-pane" aria-selected="false">Pricing</button>
+                            </li>
+                            <li class="nav-item" role="presentation"><button class="nav-link" id="inventory-tab"
+                                    data-bs-toggle="tab" data-bs-target="#inventory-tab-pane" type="button" role="tab"
+                                    aria-controls="inventory-tab-pane" aria-selected="false">Inventory</button>
+                            </li>
+                            <li class="nav-item" role="presentation"><button class="nav-link" id="details-tab"
+                                    data-bs-toggle="tab" data-bs-target="#details-tab-pane" type="button" role="tab"
+                                    aria-controls="details-tab-pane" aria-selected="false">Details</button>
+                            </li>
+                            <li class="nav-item" role="presentation"><button class="nav-link" id="shipping-tab"
+                                    data-bs-toggle="tab" data-bs-target="#shipping-tab-pane" type="button" role="tab"
+                                    aria-controls="shipping-tab-pane" aria-selected="false">Shipping</button>
+                            </li>
+                            <li class="nav-item" role="presentation"><button class="nav-link" id="seo-tab"
+                                    data-bs-toggle="tab" data-bs-target="#seo-tab-pane" type="button" role="tab"
+                                    aria-controls="seo-tab-pane" aria-selected="false">SEO & More</button>
+                            </li>
+                        </ul>
+
+                        <div class="tab-content border border-top-0 p-3">
+
+                            <div class="tab-pane fade show active" id="general-tab-pane" role="tabpanel"
+                                aria-labelledby="general-tab" tabindex="0">
+                                <h6 class="mt-3">Basic Information</h6>
+                                <div class="row g-3">
+                                    <div class="col-md-8"><label class="form-label">Product Name</label><input
+                                            type="text" class="form-control" formControlName="name"></div>
+                                    <div class="col-md-4"><label class="form-label">Slug</label><input type="text"
+                                            class="form-control" formControlName="slug"></div>
+                                    <div class="col-12"><label class="form-label">Short Description</label><input
+                                            type="text" class="form-control" formControlName="shortDescription"></div>
+                                    <div class="col-12"><label class="form-label">Full Description</label><textarea
+                                            class="form-control" formControlName="description" rows="4"></textarea>
+                                    </div>
+                                </div>
+                                <hr>
+                                <h6 class="mt-3">Identification</h6>
+                                <div class="row g-3">
+                                    <div class="col-md-6"><label class="form-label">SKU</label><input type="text"
+                                            class="form-control" formControlName="sku"></div>
+                                    <div class="col-md-6"><label class="form-label">Barcode (EAN, UPC)</label><input
+                                            type="text" class="form-control" formControlName="barcode"></div>
+                                    <div class="col-md-6"><label class="form-label">Manufacturer</label><input
+                                            type="text" class="form-control" formControlName="manufacturer"></div>
+                                </div>
+                                <hr>
+                                <h6 class="mt-3">Categorization</h6>
+                                <div class="row g-3" formGroupName="brand">
+                                    <div class="col-md-6"><label class="form-label">Brand</label><input type="text"
+                                            class="form-control" formControlName="name"></div>
+                                </div>
+                                <div class="row g-3 mt-1">
+                                    <div class="col-md-6" formGroupName="category"><label
+                                            class="form-label">Category</label><input type="text" class="form-control"
+                                            formControlName="name"></div>
+                                    <div class="col-md-6" formGroupName="subCategory"><label
+                                            class="form-label">Sub-Category</label><input type="text"
+                                            class="form-control" formControlName="name"></div>
+                                </div>
+                                <hr>
+                                <h6 class="mt-3">Product Status</h6>
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <label class="form-label">Status</label>
+                                        <!-- <select class="form-select" formControlName="status">
+                                            <option>DRAFT</option>
+                                            <option>ACTIVE</option>
+                                            <option>INACTIVE</option>
+                                        </select> -->
+
+                                        <mks-dropdown label="" [outlined]="true" [required]="false"
+                                            placeholder="Select status " [multipleSelect]="false" [maxSelect]="1"
+                                            [searchFields]="['tags']" [showSearchFields]="true" grouping="group"
+                                            [showGrouping]="true" badges="badge" [showBadges]="true" icons="icon"
+                                            [showIcons]="true" multiSelectCheckboxColor="#6366f1"
+                                            (onChange)="skill($event)">
+                                            <select #mksDropdown formControlName="status">
+                                                <option value="">-- Select --</option>
+                                                @for (status of productStatus; track $index) {
+                                                <option [value]="status">{{ status }}</option>
+                                                }
+                                            </select>
+                                        </mks-dropdown>
+
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <div class="tab-pane fade" id="pricing-tab-pane" role="tabpanel"
+                                aria-labelledby="pricing-tab" tabindex="0">
+                                <div formGroupName="price">
+                                    <div class="row g-3">
+                                        <h6 class="mt-3">Core Pricing</h6>
+                                        <div class="col-md-3">
+                                            <label class="form-label">M.R.P.</label>
+                                            <input type="number" class="form-control" formControlName="mrp">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label">Cost Price</label>
+                                            <input type="number" class="form-control" formControlName="costPrice">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label">Selling Price</label>
+                                            <input type="number" class="form-control" formControlName="sellingPrice">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label">Currency</label>
+                                            <input type="text" class="form-control" formControlName="currency">
+                                        </div>
+                                    </div>
+                                    <hr>
+                                    <div class="row g-3">
+                                        <h6 class="mt-3">Discount</h6>
+                                        <div formGroupName="discount" class="row g-3">
+                                            <div class="col-md-6">
+                                                <label class="form-label">Discount Value</label>
+                                                <input type="number" class="form-control" formControlName="value">
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label">Discount Type</label>
+                                                <select class="form-select" formControlName="type">
+                                                    <option value="percentage">Percentage (%)</option>
+                                                    <option value="fixed">Fixed</option>
+                                                </select>₹
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <hr>
+                                    <div class="row g-3">
+                                        <h6 class="mt-3">Tax</h6>
+                                        <div formGroupName="tax" class="row g-3">
+                                            <div class="col-md-6">
+                                                <label class="form-label">GST (%)</label>
+                                                <input type="number" class="form-control" formControlName="gst">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane fade" id="inventory-tab-pane" role="tabpanel"
+                                aria-labelledby="inventory-tab" tabindex="0">
+                                <div formGroupName="inventory">
+                                    <h6 class="mt-3">Main Stock</h6>
+                                    <div class="row g-3">
+                                        <div class="col-md-4">
+                                            <label class="form-label">Stock</label>
+                                            <input type="number" class="form-control" formControlName="stock">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label">Min Stock Level</label>
+                                            <input type="number" class="form-control" formControlName="minStock">
+                                        </div>
+                                        <div class="col-md-4"><label class="form-label">Max Order Qty</label><input
+                                                type="number" class="form-control" formControlName="maxOrderQuantity">
+                                        </div>
+                                    </div>
+                                    <div class="row g-3 mt-1">
+                                        <div class="col-md-6 d-flex align-items-center pt-3">
+                                            <div class="form-check form-switch">
+                                                <!-- <input class="form-check-input" type="checkbox"
+                                                    formControlName="trackInventory"> -->
+
+                                                <mks-toggle [checked]="false" color="#10b981" offColor="#d1d5db"
+                                                    size="md" label="" description="" labelPosition="right"
+                                                    onLabel="On" offLabel="Off">
+                                                </mks-toggle>
+
+                                                <!-- <label class="form-check-label">Track
+                                                    Inventory</label> -->
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 d-flex align-items-center pt-3">
+                                            <div class="form-check form-switch"><input class="form-check-input"
+                                                    type="checkbox" formControlName="allowBackorder"><label
+                                                    class="form-check-label">Allow
+                                                    Backorders</label></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr>
+                                <div formArrayName="variants">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <h6 class="mt-3">Variants</h6>
+                                        <button type="button" class="btn btn-sm btn-outline-primary"
+                                            (click)="addVariant()"><i class="bi bi-plus-circle"></i> Add
+                                            Variant</button>
+                                    </div>
+                                    @for(variant of variants.controls; track $index) {
+                                    <div [formGroupName]="$index"
+                                        class="row g-3 align-items-end mt-1 p-2 border rounded">
+                                        <div class="col-md-3"><label class="form-label">Size</label><input type="text"
+                                                class="form-control" formControlName="size"></div>
+                                        <div class="col-md-3"><label class="form-label">Color</label><input type="text"
+                                                class="form-control" formControlName="color"></div>
+                                        <div class="col-md-2"><label class="form-label">SKU</label><input type="text"
+                                                class="form-control" formControlName="sku"></div>
+                                        <div class="col-md-2"><label class="form-label">Price</label><input
+                                                type="number" class="form-control" formControlName="price"></div>
+                                        <div class="col-md-1"><label class="form-label">Stock</label><input
+                                                type="number" class="form-control" formControlName="stock"></div>
+                                        <div class="col-md-1"><button type="button" class="btn btn-sm btn-danger"
+                                                (click)="removeVariant($index)"><i class="bi bi-trash"></i></button>
+                                        </div>
+                                    </div>
+                                    }
+                                </div>
+                            </div>
+
+
+                            <div class="tab-pane fade" id="details-tab-pane" role="tabpanel"
+                                aria-labelledby="details-tab" tabindex="0">
+                                <h6 class="mt-3">Product Details</h6>
+                                <div class="row g-3">
+                                    <div class="col-md-6"><label class="form-label">Gender</label><input type="text"
+                                            class="form-control" formControlName="gender"></div>
+                                    <div class="col-md-6"><label class="form-label">Age Group</label><input type="text"
+                                            class="form-control" formControlName="ageGroup"></div>
+                                    <div class="col-12"><label class="form-label">Skin Type
+                                            (comma-separated)</label><input type="text" class="form-control"
+                                            formControlName="skinType"></div>
+                                </div>
+                                <hr>
+                                <h6 class="mt-3">Lists (comma-separated)</h6>
+                                <div class="row g-3">
+                                    <div class="col-12"><label class="form-label">Collections</label><input type="text"
+                                            class="form-control" formControlName="collections"></div>
+                                    <div class="col-12"><label class="form-label">Tags</label><input type="text"
+                                            class="form-control" formControlName="tags"></div>
+                                    <div class="col-12"><label class="form-label">Ingredients</label><textarea
+                                            class="form-control" formControlName="ingredients" rows="2"></textarea>
+                                    </div>
+                                    <div class="col-12"><label class="form-label">Benefits</label><textarea
+                                            class="form-control" formControlName="benefits" rows="2"></textarea></div>
+                                    <div class="col-12"><label class="form-label">How to Use</label><textarea
+                                            class="form-control" formControlName="howToUse" rows="2"></textarea></div>
+                                    <div class="col-12"><label class="form-label">Warnings</label><textarea
+                                            class="form-control" formControlName="warnings" rows="2"></textarea></div>
+                                </div>
+                                <hr>
+                                <h6 class="mt-3">Media</h6>
+                                <div class="mb-3">
+                                    <label class="form-label">Product Images</label>
+                                    <input type="file" class="form-control" (change)="onImagesSelected($event)"
+                                        accept="image/*" multiple>
+                                    <div class="form-text">You can select multiple images at once.</div>
+                                </div>
+
+
+                                <div formArrayName="images" class="row g-3">
+                                    @for(imageGroup of images.controls; track $index) {
+                                    <div [formGroupName]="$index" class="col-md-4">
+                                        <div class="card">
+                                            <img [src]="imageGroup.get('url')?.value" class="card-img-top"
+                                                style="height: 150px; object-fit: cover;">
+                                            <div class="card-body">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" name="primaryImage"
+                                                        [id]="'primary' + $index"
+                                                        [checked]="imageGroup.get('isPrimary')?.value"
+                                                        (change)="setPrimaryImage($index)">
+                                                    <label class="form-check-label" [for]="'primary' + $index">
+                                                        Primary
+                                                    </label>
+                                                </div>
+                                                <button type="button" class="btn btn-sm btn-danger mt-2"
+                                                    (click)="removeImage($index)"><i class="bi bi-trash"></i>
+                                                    Remove</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    }
+                                </div>
+                            </div>
+
+
+                            <div class="tab-pane fade" id="shipping-tab-pane" role="tabpanel"
+                                aria-labelledby="shipping-tab" tabindex="0">
+                                <div formGroupName="shipping">
+                                    <h6 class="mt-3">Dimensions</h6>
+                                    <div class="row g-3">
+                                        <div class="col-md-3"><label class="form-label">Weight (kg)</label><input
+                                                type="number" class="form-control" formControlName="weight"></div>
+                                        <div class="col-md-3"><label class="form-label">Width (cm)</label><input
+                                                type="number" class="form-control" formControlName="width"></div>
+                                        <div class="col-md-3"><label class="form-label">Height (cm)</label><input
+                                                type="number" class="form-control" formControlName="height"></div>
+                                        <div class="col-md-3"><label class="form-label">Length (cm)</label><input
+                                                type="number" class="form-control" formControlName="length"></div>
+                                    </div>
+                                    <hr>
+                                    <h6 class="mt-3">Fees & Policy</h6>
+                                    <div class="row g-3">
+                                        <div class="col-md-6"><label class="form-label">Shipping Charge</label><input
+                                                type="number" class="form-control" formControlName="shippingCharge">
+                                        </div>
+                                        <div class="col-md-6 d-flex align-items-center pt-3">
+                                            <div class="form-check form-switch"><input class="form-check-input"
+                                                    type="checkbox" formControlName="freeShipping"><label
+                                                    class="form-check-label">Free
+                                                    Shipping</label></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr>
+                                <div formGroupName="returnPolicy">
+                                    <h6 class="mt-3">Return Policy</h6>
+                                    <div class="row g-3">
+                                        <div class="col-md-6"><label class="form-label">Return Period
+                                                (days)</label><input type="number" class="form-control"
+                                                formControlName="returnDays"></div>
+                                        <div class="col-md-6 d-flex align-items-center pt-3">
+                                            <div class="form-check form-switch"><input class="form-check-input"
+                                                    type="checkbox" formControlName="returnable"><label
+                                                    class="form-check-label">Is
+                                                    Returnable?</label></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr>
+                                <div formGroupName="warranty">
+                                    <h6 class="mt-3">Warranty</h6>
+                                    <div class="row g-3">
+                                        <div class="col-md-6"><label class="form-label">Warranty Duration</label><input
+                                                type="text" class="form-control" formControlName="duration"></div>
+                                        <div class="col-md-6 d-flex align-items-center pt-3">
+                                            <div class="form-check form-switch"><input class="form-check-input"
+                                                    type="checkbox" formControlName="available"><label
+                                                    class="form-check-label">Warranty
+                                                    Available?</label></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <div class="tab-pane fade" id="seo-tab-pane" role="tabpanel" aria-labelledby="seo-tab"
+                                tabindex="0">
+                                <div formGroupName="seo">
+                                    <h6 class="mt-3">SEO</h6>
+                                    <div class="row g-3">
+                                        <div class="col-12"><label class="form-label">SEO Title</label><input
+                                                type="text" class="form-control" formControlName="title"></div>
+                                        <div class="col-12"><label class="form-label">SEO Description</label><textarea
+                                                class="form-control" formControlName="description" rows="2"></textarea>
+                                        </div>
+                                        <div class="col-12"><label class="form-label">SEO Keywords
+                                                (comma-separated)</label><input type="text" class="form-control"
+                                                formControlName="keywords"></div>
+                                    </div>
+                                </div>
+                                <hr>
+                                <div formGroupName="rating">
+                                    <h6 class="mt-3">Ratings (Read-only)</h6>
+                                    <div class="row g-3">
+                                        <div class="col-md-4"><label class="form-label">Average Rating</label><input
+                                                type="number" class="form-control" formControlName="average"></div>
+                                        <div class="col-md-4"><label class="form-label">Total Reviews</label><input
+                                                type="number" class="form-control" formControlName="totalReviews"></div>
+                                        <div class="col-md-4"><label class="form-label">Total Ratings</label><input
+                                                type="number" class="form-control" formControlName="totalRatings"></div>
+                                    </div>
+                                </div>
+                                <hr>
+                                <div formGroupName="sales">
+                                    <h6 class="mt-3">Sales Data (Read-only)</h6>
+                                    <div class="row g-3">
+                                        <div class="col-md-4"><label class="form-label">Units Sold</label><input
+                                                type="number" class="form-control" formControlName="sold"></div>
+                                        <div class="col-md-4"><label class="form-label">Wishlist Count</label><input
+                                                type="number" class="form-control" formControlName="wishlistCount">
+                                        </div>
+                                        <div class="col-md-4"><label class="form-label">View Count</label><input
+                                                type="number" class="form-control" formControlName="viewCount"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-2 justify-content-end">
+                        <button type="button" class="btn btn-outline-secondary" (click)="cancelAllProduct()" data-bs-dismiss="modal">Cancel</button>
+                        @if (isEditMode() && selectedProduct(); as product) {
+                        <button type="button" class="btn btn-danger" (click)="deleteProduct(product.id())"
+                            data-bs-dismiss="modal">Delete</button>
+                        }
+                        <button type="submit" class="btn btn-primary" [disabled]="productForm.invalid"
+                            data-bs-dismiss="modal">{{
+                            isEditMode() ? 'Update' : 'Save' }} Product</button>
+                    </div>
+                </form>
+            </div>
+            <div class="col-4">
+                <div class="card">
+
+                    <div class="card-body">
+                        <h5>Current Images</h5>
+                        <p class="text-muted small">Select a primary image for the product. This will be the first image
+                            customers see.</p>
+
+                        <div class="row mb-4">
+
+                            <div class="col-3 mb-2">
+                                <div class="card position-relative">
+                                    <img src="../../../assets/images/ecommerce/product-1.jpg" class="card-img-top"
+                                        alt="Product Image">
+                                    <div class="position-absolute">
+                                        <input class="form-check-input" type="radio" name="primaryImage"
+                                            id="primaryImage1" checked style="margin: 5px;font-size: 20px;">
+                                    </div>
+                                    <div class="card-footer p-1 text-center">
+                                        <a style="font-size: 10px;" class="btn btn-sm btn-outline-danger">Remove</a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-3 mb-2">
+                                <div class="card position-relative">
+                                    <img src="../../../assets/images/ecommerce/product-1.jpg" class="card-img-top"
+                                        alt="Product Image">
+                                    <div class="position-absolute">
+                                        <input class="form-check-input" type="radio" name="primaryImage"
+                                            id="primaryImage1" checked style="margin: 5px;font-size: 20px;">
+                                    </div>
+                                    <div class="card-footer p-1 text-center">
+                                        <a style="font-size: 10px;" class="btn btn-sm btn-outline-danger">Remove</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-3 mb-2">
+                                <div class="card position-relative">
+                                    <img src="../../../assets/images/png/photo copy.png" class="card-img-top"
+                                        alt="Product Image">
+
+                                    <div class="card-footer p-1 text-center">
+                                        <a style="font-size: 10px;" class="btn btn-sm btn-outline-success">Add</a>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                        </div>
+
+                        <hr>
+
+
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+
+    </section>
+    }
+    <!-- add new product end here  -->
+
+
+
+
+</div>
