@@ -1,0 +1,352 @@
+<!-- ══════════════════════════════════════════════════════════════════════
+    app-loader
+    ──────────────────────────────────────────────────────────────────────
+    [visible]="bool"     → ts se true/false karo (loader dikhao/chhupao)
+    title="..."          → heading text
+    message="..."        → subtitle text
+    color="#6366f1"      → dot/spinner/bar ka color
+    backdrop="blur|light|dark|transparent"
+    type="dots|spinner|bar|pulse|wave|ring"
+    [showTitle]="true"
+    [showMessage]="true"
+    [fullscreen]="true"  → false karo to inline dikhega
+  ══════════════════════════════════════════════════════════════════════ -->
+  <app-loader
+    [visible]="isLoaderLoading"
+    title="Loading..."
+    message="Please wait..."
+    color="#6366f1"
+    backdrop="blur"
+    type="dots"
+    [fullscreen]="true">
+  </app-loader>
+
+
+
+
+
+
+
+  <!-- ══════════════════════════════════════════════════════════════════════
+    app-dropdown2  —  mat-form-field style wrapper
+    ──────────────────────────────────────────────────────────────────────
+    Bilkul mat-form-field ki tarah use karo — <select> andar likhte ho:
+
+    <app-dropdown2 label="Cars">
+      <select #dd2Select [(ngModel)]="selectedCar">
+        <option value="">-- Select --</option>
+        ...options...
+      </select>
+    </app-dropdown2>
+
+    Wrapper inputs (mat-form-field style):
+      label="..."              → upar label
+      [outlined]="false"       → true = outlined border
+      [required]="false"       → asterisk *
+      hint="..."               → niche hint text
+      error="..."              → niche red error
+
+    Rich feature inputs (same as app-dropdown):
+      placeholder="..."
+      [multipleSelect]="true"       → custom UI ON hoga automatically
+      [maxSelect]="3"               → 0 = unlimited
+      [searchFields]="['tags']"     → extra search fields
+      [canSearch]="true"            → ya [showSearchFields]="true/false"
+      grouping="group"              → data-group attribute se aata hai
+      [showGrouping]="true"
+      badges="badge"                → data-badge attribute se aata hai
+      [showBadges]="true"
+      icons="icon"                  → data-icon attribute se aata hai
+      [showIcons]="true"
+      multiSelectCheckboxColor="#6366f1"
+      [loading]="false"
+      [disabled]="false"
+      [readonly]="false"
+      (onChange)="fn($event)"       → single: value | multiple: value[]
+
+    Rich features ke liye option mein data-* attrs lagao:
+      <option [value]="item.value"
+        [attr.data-group]="item.group"
+        [attr.data-badge]="item.badge"
+        [attr.data-icon]="item.icon">{{ item.label }}</option>
+
+    ⚡ MODES:
+      → multipleSelect / dataArray nahi → native <select> styled wrapper
+      → multipleSelect="true" ya [dataArray] → custom dropdown UI
+  ══════════════════════════════════════════════════════════════════════ -->
+
+    <app-dropdown
+      label="Tech Skills"
+      [outlined]="true"
+      [required]="true"
+      placeholder="Select tech skills"
+      [multipleSelect]="true"
+      [maxSelect]="0"
+      [searchFields]="['tags']"
+      [showSearchFields]="true"
+      grouping="group"
+      [showGrouping]="true"
+      badges="badge"
+      [showBadges]="true"
+      icons="icon"
+      [showIcons]="true"
+      multiSelectCheckboxColor="#6366f1"
+      (onChange)="skill($event)">
+      <select #mksDropdown [(ngModel)]="dd2SelectedValues">
+        <option value="">-- Select --</option>
+        @for (skill of techSkills; track $index) {
+          <option
+            [value]="skill.email"
+            [disabled]="skill.disabled"
+            [attr.data-group]="skill.group"
+            [attr.data-badge]="skill.badge"
+            [attr.data-icon]="skill.icon"
+            >{{ skill.email }}</option>
+        }
+      </select>
+    </app-dropdown>
+   
+      <p style="margin-top:6px;color:#6366f1;font-size:13px">
+        Selected: <strong>{{ dd2SelectedValues }}</strong>
+      </p>
+ 
+
+  
+
+
+
+
+
+<!-- ══════════════════════════════════════════════════════════════════════
+    app-toggle
+    ──────────────────────────────────────────────────────────────────────
+    [checked]="false"          → initial state
+    color="#22c55e"            → ON color
+    offColor="#d1d5db"         → OFF color
+    size="sm|md|lg"
+    label="..."                → label text
+    description="..."          → label ke neeche subtitle
+    labelPosition="right|left"
+    onLabel="ON"               → track ke andar text
+    offLabel="OFF"
+    [loading]="false"
+    [readonly]="false"
+    [disabled]="false"
+    (onChange)="fn($event)"    → $event = true/false
+  ══════════════════════════════════════════════════════════════════════ -->
+  <app-toggle
+    [checked]="false"
+    color="#10b981"
+    offColor="#d1d5db"
+    size="md"
+    label="Dark Mode"
+    description="Toggle dark/light theme"
+    labelPosition="right"
+    onLabel="ON"
+    offLabel="OFF"
+    (onChange)="toggleChanged($event)">
+  </app-toggle>
+
+
+
+
+
+
+  <!-- ══════════════════════════════════════════════════════════════════════
+    app-range
+    ──────────────────────────────────────────────────────────────────────
+    label="..."
+    [min]="0"   [max]="100"   [step]="1"
+    color="#4f46e5"            → filled track + thumb color
+    trackColor="#e5e7eb"       → unfilled track color
+    thumbColor="#4f46e5"       → thumb border color
+    size="sm|md|lg"
+    [height]="6"               → track height px
+    prefix="Age: "             → value se pehle text
+    suffix=" yrs"              → value ke baad text
+    [showLabel]="true"
+    [showValue]="true"
+    [showTooltip]="true"
+    tooltipPosition="top|bottom"
+    [readonly]="false"
+    [disabled]="false"
+    (onChange)="fn($event)"    → $event = number
+  ══════════════════════════════════════════════════════════════════════ -->
+  <app-range
+    label="Age Range"
+    [min]="18"
+    [max]="60"
+    [step]="1"
+    color="#6366f1"
+    trackColor="#e5e7eb"
+    thumbColor="#4338ca"
+    size="md"
+    [height]="6"
+    prefix="Age: "
+    suffix=" yrs"
+    [showLabel]="true"
+    [showValue]="true"
+    [showTooltip]="true"
+    tooltipPosition="top"
+    (onChange)="rangeChanged($event)">
+  </app-range>
+
+
+
+
+
+
+
+
+
+
+  <!-- ══════════════════════════════════════════════════════════════════════
+    app-calendar
+    ──────────────────────────────────────────────────────────────────────
+    mode="single|range|multiple"
+    color="#6366f1"
+    dateFormat="DD/MM/YYYY|MM/DD/YYYY|YYYY-MM-DD|DD-MM-YYYY|DD MMM YYYY"
+    placeholder="..."
+    [showToday]="true"
+    [firstDayOfWeek]="1"       → 1=Monday, 0=Sunday
+    [inline]="false"           → true = hamesha visible
+    [minDate]="dateObj"
+    [maxDate]="dateObj"
+    [disabledDates]="[date1, date2]"
+    [readonly]="false"
+    [disabled]="false"
+    (onChange)="fn($event)"
+      single   → $event = Date
+      range    → $event = { start: Date, end: Date }
+      multiple → $event = Date[]
+  ══════════════════════════════════════════════════════════════════════ -->
+  <app-calendar
+    mode="single"
+    color="#6366f1"
+    dateFormat="DD MMM YYYY"
+    placeholder="Select a date"
+    [showToday]="true"
+    [firstDayOfWeek]="1"
+    [inline]="false"
+    (onChange)="dateChanged($event)">
+  </app-calendar>
+
+
+
+
+
+
+
+
+
+  <!-- ══════════════════════════════════════════════════════════════════════
+    app-rating
+    ──────────────────────────────────────────────────────────────────────
+    [max]="5"
+    color="#f59e0b"             → filled star color
+    emptyColor="#e5e7eb"        → empty star color
+    size="sm|md|lg"
+    [allowHalf]="true"          → half star support
+    [showValue]="true"          → "3.5 / 5" dikhao
+    [clearable]="true"          → same click = clear
+    label="..."
+    [tooltips]="['Poor','Fair','Good','Great','Excellent']"
+    [readonly]="false"
+    [disabled]="false"
+    (onChange)="fn($event)"     → $event = number
+  ══════════════════════════════════════════════════════════════════════ -->
+  <app-rating
+    [max]="5"
+    color="#f59e0b"
+    emptyColor="#e5e7eb"
+    size="lg"
+    [allowHalf]="true"
+    [showValue]="true"
+    [clearable]="true"
+    label="Rate this product"
+    [tooltips]="['Poor','Fair','Good','Very Good','Excellent']"
+    (onChange)="ratingChanged($event)">
+  </app-rating>
+
+
+
+
+
+
+
+
+
+
+<!-- ══════════════════════════════════════════════════════════════════════
+    app-sort  (headless — sirf sort logic, koi UI nahi)
+    ──────────────────────────────────────────────────────────────────────
+    [data]="myArray"            → client mode: sorted data milega
+    (onSort)="fn($event)"       → server mode: { key, dir }
+
+    #s="appSort" se access:
+    s.sort('key')      → column sort toggle
+    s.sortIcon('key')  → ' ⇅' | ' ↑' | ' ↓'
+    s.thClass('key')   → 'th-sort' ya 'th-sort th-active'
+    s.isSorted('key')  → boolean
+    s.sortedData       → client mode sorted array
+    s.sortKey          → current sort column
+    s.sortDir          → 'asc' | 'desc'
+    s.reset()          → sort clear karo
+
+    app-pagination  (sirf pagination UI)
+    ──────────────────────────────────────────────────────────────────────
+    [data]="myArray"            → CLIENT mode: pagedData milega
+    [total]="serverTotal"       → SERVER mode: API total count
+    [pageSize]="10"
+    [pageSizeOptions]="[5,10,25]"
+    color="#6366f1"
+    [showInfo]="true"
+    [showPageSize]="true"
+    (onPageChange)="fn($event)"
+
+    $event = { page, pageSize, skip (OFFSET), take (LIMIT) }
+
+    #pg="appPagination" se access:
+    pg.pagedData   → current page rows (@for loop mein)
+    pg.currentPage
+    pg.totalPages
+    pg.totalItems
+  ══════════════════════════════════════════════════════════════════════ -->
+  
+  <app-sort #s="appSort" [data]="tableData" (onSort)="onServerSort($event)"></app-sort>
+
+  <div class="simple-table-wrap">
+    <table class="simple-table">
+      <thead>
+        <tr>
+          <th [class]="s.thClass('name')"   (click)="s.sort('name')">Name{{ s.sortIcon('name') }}</th>
+          <th [class]="s.thClass('role')"   (click)="s.sort('role')">Role{{ s.sortIcon('role') }}</th>
+          <th [class]="s.thClass('status')" (click)="s.sort('status')">Status{{ s.sortIcon('status') }}</th>
+          <th [class]="s.thClass('joined')" (click)="s.sort('joined')">Joined{{ s.sortIcon('joined') }}</th>
+          <th class="th-center">Verified</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of pg.pagedData; track $index) {
+          <tr>
+            <td><div class="td-name"><div class="td-avatar">{{ row.name.charAt(0) }}</div>{{ row.name }}</div></td>
+            <td><span class="td-badge" [style.background]="$any({Admin:'#6366f1',Manager:'#f59e0b',User:'#22c55e',Intern:'#94a3b8'})[row.role]">{{ row.role }}</span></td>
+            <td><span class="td-badge" [style.background]="$any({Active:'#22c55e',Inactive:'#ef4444',Pending:'#f59e0b'})[row.status]">{{ row.status }}</span></td>
+            <td class="td-muted">{{ row.joined }}</td>
+            <td class="td-center"><span class="td-bool" [class.bool-yes]="row.verified" [class.bool-no]="!row.verified">{{ row.verified ? '✓' : '✗' }}</span></td>
+          </tr>
+        }
+      </tbody>
+    </table>
+    <div class="pgn-box">
+      <app-pagination #pg="appPagination"
+        [data]="s.sortedData"
+        [pageSize]="5"
+        [pageSizeOptions]="[5, 10, 25]"
+        color="#6366f1"
+        [showInfo]="true"
+        [showPageSize]="true"
+        (onPageChange)="onPageChange($event)">
+      </app-pagination>
+    </div>
+  </div>
