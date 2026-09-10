@@ -1,82 +1,101 @@
-import { Component, signal, WritableSignal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { PageInfo } from '../../shared/lib/page-info/page-info';
 
-// Define the structure of an address
+export type AddressType = 'Home' | 'Work' | 'Other';
+
 export interface Address {
   id: number;
+  name: string;
+  phone: string;
   street: string;
   city: string;
   state: string;
   zip: string;
-  type: 'Home' | 'Work' | 'Other';
+  type: AddressType;
+  isDefault: boolean;
 }
 
 @Component({
   selector: 'app-address',
-  standalone: true, // Mark as standalone
-  imports: [CommonModule, FormsModule], // Import necessary modules
+  standalone: true,
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, PageInfo],
   templateUrl: './address.html',
-  styleUrls: ['./address.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush, // Use OnPush change detection
+  styleUrl: './address.scss',
 })
 export class AddressComponent {
-  // Signal to hold the list of addresses
-  addresses: WritableSignal<Address[]> = signal([
-    { id: 1, street: '123 Main St', city: 'Anytown', state: 'CA', zip: '12345', type: 'Home' },
-    { id: 2, street: '456 Oak Ave', city: 'Someville', state: 'TX', zip: '67890', type: 'Work' },
+  private readonly fb = inject(FormBuilder);
+
+  readonly addresses = signal<Address[]>([
+    { id: 1, name: 'Manoj Kumar', phone: '9876543210', street: '123, ABC Street', city: 'New Delhi', state: 'Delhi', zip: '110001', type: 'Home', isDefault: true },
+    { id: 2, name: 'Priya Sharma', phone: '9812345670', street: '45, MG Road', city: 'Bengaluru', state: 'Karnataka', zip: '560001', type: 'Work', isDefault: false },
+    { id: 3, name: 'Rahul Traders (Warehouse)', phone: '9876500000', street: 'Plot 7, Industrial Area', city: 'Mumbai', state: 'Maharashtra', zip: '400001', type: 'Other', isDefault: false },
   ]);
 
-  // Signal to manage the address being added or edited
-  selectedAddress: WritableSignal<Address | null> = signal(null);
+  readonly searchTerm = signal('');
+  readonly editingId = signal<number | null>(null);
 
-  // Signal to toggle the form visibility
-  showForm: WritableSignal<boolean> = signal(false);
+  readonly typeOptions: AddressType[] = ['Home', 'Work', 'Other'];
 
-  // Method to initiate adding a new address
-  onAdd() {
-    this.selectedAddress.set({ id: Date.now(), street: '', city: '', state: '', zip: '', type: 'Home' });
-    this.showForm.set(true);
-  }
-
-  // Method to select an address for editing
-  onEdit(address: Address) {
-    // Create a copy to avoid direct mutation of the signal's internal state
-    this.selectedAddress.set({ ...address });
-    this.showForm.set(true);
-  }
-
-  // Method to delete an address
-  onDelete(addressToDelete: Address) {
-    if (confirm('Are you sure you want to delete this address?')) {
-      this.addresses.update(list => list.filter(addr => addr.id !== addressToDelete.id));
+  readonly filteredAddresses = computed(() => {
+    const term = this.searchTerm().trim().toLowerCase();
+    if (!term) {
+      return this.addresses();
     }
+    return this.addresses().filter(
+      (a) =>
+        a.name.toLowerCase().includes(term) ||
+        a.city.toLowerCase().includes(term) ||
+        a.state.toLowerCase().includes(term) ||
+        a.zip.includes(term)
+    );
+  });
+
+  readonly form = this.fb.group({
+    name: ['', Validators.required],
+    phone: ['', Validators.required],
+    street: ['', Validators.required],
+    city: ['', Validators.required],
+    state: ['', Validators.required],
+    zip: ['', Validators.required],
+    type: ['Home' as AddressType, Validators.required],
+    isDefault: [false],
+  });
+
+  openAdd(): void {
+    this.editingId.set(null);
+    this.form.reset({ name: '', phone: '', street: '', city: '', state: '', zip: '', type: 'Home', isDefault: false });
   }
 
-  // Method to save a new or updated address
-  onSave() {
-    const addressToSave = this.selectedAddress();
-    if (!addressToSave) return;
+  openEdit(address: Address): void {
+    this.editingId.set(address.id);
+    this.form.reset({ ...address });
+  }
 
-    // Check if it's a new address (by checking if the id exists in the current list)
-    const exists = this.addresses().some(addr => addr.id === addressToSave.id);
+  save(): void {
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
 
-    if (exists) {
-      // Update existing address
-      this.addresses.update(list =>
-        list.map(addr => (addr.id === addressToSave.id ? addressToSave : addr))
-      );
+    const value = this.form.getRawValue() as Omit<Address, 'id'>;
+    const editingId = this.editingId();
+
+    if (editingId) {
+      this.addresses.update((list) => list.map((a) => (a.id === editingId ? { ...a, ...value } : a)));
     } else {
-      // Add new address
-      this.addresses.update(list => [...list, addressToSave]);
+      this.addresses.update((list) => [{ ...value, id: Date.now() }, ...list]);
     }
-
-    this.onCancel();
   }
 
-  // Method to cancel the add/edit operation
-  onCancel() {
-    this.selectedAddress.set(null);
-    this.showForm.set(false);
+  makeDefault(id: number): void {
+    this.addresses.update((list) => list.map((a) => ({ ...a, isDefault: a.id === id })));
+  }
+
+  deleteAddress(id: number): void {
+    if (confirm('Are you sure you want to delete this address?')) {
+      this.addresses.update((list) => list.filter((a) => a.id !== id));
+    }
   }
 }

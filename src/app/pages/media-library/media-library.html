@@ -1,0 +1,50 @@
+<div class="container-fluid px-3 px-lg-4 py-4">
+    <!-- PAGE HEADING -->
+    <div class="page-heading">
+        <div class="page-heading-copy">
+            <span class="page-icon"><i class="bi bi-images" aria-hidden="true"></i></span>
+            <div>
+                <h1 class="h5 mb-1 d-flex align-items-center gap-2">Media Library <app-page-info heading="Media Library" text="Browse, upload, and reuse images across products, sliders, and other content instead of uploading duplicates."></app-page-info></h1>
+                <p class="text-muted mb-0">Browse, upload, and manage images used across the platform.</p>
+            </div>
+        </div>
+        <div class="heading-actions">
+            <label class="btn btn-success btn-sm mb-0">
+                <i class="bi bi-upload" aria-hidden="true"></i>
+                Upload Media
+                <input type="file" accept="image/*" multiple hidden (change)="onFilesSelected($event)">
+            </label>
+        </div>
+    </div>
+
+    <section class="panel mt-3">
+        <div class="panel-header">
+            <h2 class="h5 mb-1 section-title"><i class="bi bi-grid" aria-hidden="true"></i> All Media ({{ filteredItems().length }})</h2>
+            <input class="form-control form-control-md table-search" type="search" placeholder="Search media..."
+                aria-label="Search media" [ngModel]="searchTerm()" (ngModelChange)="searchTerm.set($event)">
+        </div>
+
+        @if (filteredItems().length) {
+            <div class="media-grid">
+                @for (item of filteredItems(); track item.id) {
+                    <div class="media-card">
+                        <img class="media-thumb" [src]="item.url" [alt]="item.name">
+                        <div class="media-card-body">
+                            <p class="media-name mb-1" [title]="item.name">{{ item.name }}</p>
+                            <p class="media-meta mb-1" [title]="item.usedIn">{{ item.usedIn }}</p>
+                            <p class="media-meta mb-2">{{ item.uploadedDate }}</p>
+                            <button type="button" class="btn btn-outline-danger btn-sm w-100" (click)="deleteItem(item.id)">
+                                <i class="bi bi-trash" aria-hidden="true"></i> Delete
+                            </button>
+                        </div>
+                    </div>
+                }
+            </div>
+        } @else {
+            <div class="text-center text-muted py-5">
+                <i class="bi bi-inbox fs-3 d-block mb-2" aria-hidden="true"></i>
+                No media files found.
+            </div>
+        }
+    </section>
+</div>

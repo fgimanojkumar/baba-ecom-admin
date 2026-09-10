@@ -26,6 +26,9 @@
         <h1 class="h3 mb-1">Login</h1>
         <p class="text-muted mb-0">Sign in to your admin workspace.</p>
       </div>
+      @if (errorMessage()) {
+        <div class="alert alert-danger py-2 small mb-3">{{ errorMessage() }}</div>
+      }
       <div class="mb-3"><label class="form-label" for="loginEmail">Email address</label>
         <input class="form-control" id="loginEmail" type="email" formControlName="email" required>
         <div class="invalid-feedback">Enter a valid email.</div>
@@ -44,7 +47,12 @@
       <button class="btn btn-primary w-100" type="submit" >
         <i class="bi bi-box-arrow-in-right" aria-hidden="true"></i>
         Sign In</button>
+      <p class="small text-muted mt-3 mb-0">
+        Demo super admin: <strong>admin&#64;babaecom.com</strong> / <strong>admin123</strong><br>
+        Demo seller: <strong>seller&#64;babaecom.com</strong> / <strong>seller123</strong>
+      </p>
     </form>
+
 
     <div class="auth-footer">New here? <a href="register.html">Create an account</a></div>
   </section>

@@ -4,204 +4,144 @@
         <div class="page-heading-copy">
             <span class="page-icon"><i class="bi bi-chat-right-text" aria-hidden="true"></i></span>
             <div>
-                <h1 class="h5 mb-1">Contact Inquiries</h1>
+                <h1 class="h5 mb-1 d-flex align-items-center gap-2">Contact Inquiries <app-page-info heading="Contact Inquiries" text="View, reply to, and manage messages submitted by customers through the storefront contact form."></app-page-info></h1>
                 <p class="text-muted mb-0">Manage messages and inquiries from customers.</p>
             </div>
         </div>
     </div>
 
-
-     <div class="row">
-        <div class="col-md-6">
-            <mks-calendar mode="single" color="#6366f1" dateFormat="DD MMM YYYY" placeholder="Start date"
-                [showToday]="true" [firstDayOfWeek]="1" [inline]="false">
-            </mks-calendar>
-        </div>
-        <div class="col-md-6">
-            <mks-calendar mode="single" color="#6366f1" dateFormat="DD MMM YYYY" placeholder="End date"
-                [showToday]="true" [firstDayOfWeek]="1" [inline]="false">
-            </mks-calendar>
-        </div>
+    <!-- STATUS TABS -->
+    <div class="status-tabs mt-3" role="tablist">
+        <button type="button" class="status-tab" [class.active]="activeStatus() === 'all'" (click)="setStatus('all')">
+            <span class="status-tab-label">All</span>
+            <span class="status-tab-count">{{ counts().all }}</span>
+        </button>
+        <button type="button" class="status-tab" [class.active]="activeStatus() === 'New'" (click)="setStatus('New')">
+            <span class="status-tab-label">New / Unread</span>
+            <span class="status-tab-count">{{ counts().new }}</span>
+        </button>
+        <button type="button" class="status-tab" [class.active]="activeStatus() === 'Replied'" (click)="setStatus('Replied')">
+            <span class="status-tab-label">Replied</span>
+            <span class="status-tab-count">{{ counts().replied }}</span>
+        </button>
+        <button type="button" class="status-tab" [class.active]="activeStatus() === 'Closed'" (click)="setStatus('Closed')">
+            <span class="status-tab-label">Closed</span>
+            <span class="status-tab-count">{{ counts().closed }}</span>
+        </button>
     </div>
 
-
-    <!-- TABS NAVIGATION -->
-    <ul class="nav nav-pills nav-fill mt-3" id="contactTab" role="tablist">
-        <li class="nav-item p-1" role="presentation">
-            <button class="nav-link active w-100" data-bs-toggle="tab" data-bs-target="#all-pane"
-                type="button">All <span class="badge text-bg-secondary">215</span></button>
-        </li>
-        <li class="nav-item p-1" role="presentation">
-            <button class="nav-link w-100" data-bs-toggle="tab" data-bs-target="#new-pane" type="button">New /
-                Unread <span class="badge text-bg-secondary">18</span></button>
-        </li>
-        <li class="nav-item p-1" role="presentation">
-            <button class="nav-link w-100" data-bs-toggle="tab" data-bs-target="#replied-pane"
-                type="button">Replied</button>
-        </li>
-        <li class="nav-item p-1" role="presentation">
-            <button class="nav-link w-100" data-bs-toggle="tab" data-bs-target="#closed-pane"
-                type="button">Closed</button>
-        </li>
-    </ul>
-
-    <!-- TABS CONTENT -->
-    <div class="tab-content mt-3" id="contactTabContent">
-        <!-- ALL PANE -->
-        <div class="tab-pane fade show active" id="all-pane" role="tabpanel" tabindex="0">
-            <section class="panel">
-                <div class="panel-header">
-                    <h2 class="h5 mb-1 section-title">All Inquiries</h2>
-                </div>
-                <div class="table-responsive">
-                    <table class="table align-middle mb-0">
-                        <thead>
-                            <tr>
-                                <th scope="col">From</th>
-                                <th scope="col">Subject</th>
-                                <th scope="col">Date</th>
-                                <th scope="col">Status</th>
-                                <th scope="col" class="text-end">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- Dummy Inquiry Row 1 (New) -->
-                            <tr class="fw-bold">
-                                <td>
-                                    <div class="d-flex align-items-center">
+    <!-- INQUIRY LIST -->
+    <section class="panel mt-3">
+        <div class="panel-header">
+            <h2 class="h5 mb-1 section-title"><i class="bi bi-table" aria-hidden="true"></i> Inquiries</h2>
+            <input class="form-control form-control-md table-search" type="search" placeholder="Search inquiries..."
+                aria-label="Search inquiries" [ngModel]="searchTerm()" (ngModelChange)="searchTerm.set($event)">
+        </div>
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th scope="col">From</th>
+                        <th scope="col">Subject</th>
+                        <th scope="col">Date</th>
+                        <th scope="col">Status</th>
+                        <th scope="col" class="text-end">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (inquiry of filteredInquiries(); track inquiry.id) {
+                        <tr [class.fw-bold]="inquiry.status === 'New'">
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    @if (inquiry.status === 'New') {
                                         <span class="status-dot bg-primary me-2"></span>
-                                        <div>
-                                            <p class="mb-0">Manoj Kumar</p>
-                                            <p class="text-muted small mb-0">manoj@example.com</p>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>Question about my order #ORD-001250</td>
-                                <td>July 18, 2026</td>
-                                <td><span class="badge text-bg-primary">New</span></td>
-                                <td class="text-end">
-                                    <button class="btn btn-sm btn-primary" data-bs-toggle="modal"
-                                        data-bs-target="#contactDetailsModal">View & Reply</button>
-                                </td>
-                            </tr>
-                            <!-- Dummy Inquiry Row 2 (Replied) -->
-                            <tr>
-                                <td>
+                                    }
                                     <div>
-                                        <p class="fw-semibold mb-0">Priya Sharma</p>
-                                        <p class="text-muted small mb-0">priya@example.com</p>
+                                        <p class="mb-0">{{ inquiry.name }}</p>
+                                        <p class="text-muted small mb-0">{{ inquiry.email }}</p>
                                     </div>
-                                </td>
-                                <td>Feedback on product quality</td>
-                                <td>July 17, 2026</td>
-                                <td><span class="badge text-bg-success">Replied</span></td>
-                                <td class="text-end">
-                                    <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal"
-                                        data-bs-target="#contactDetailsModal">View</button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </section>
+                                </div>
+                            </td>
+                            <td>{{ inquiry.subject }}</td>
+                            <td>{{ inquiry.date }}</td>
+                            <td>
+                                <span class="badge" [ngClass]="{'text-bg-primary': inquiry.status === 'New', 'text-bg-success': inquiry.status === 'Replied', 'text-bg-secondary': inquiry.status === 'Closed'}">
+                                    {{ inquiry.status }}
+                                </span>
+                            </td>
+                            <td class="text-end">
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-info dropdown-toggle btn-sm"
+                                        data-bs-toggle="dropdown" aria-expanded="false">Action</button>
+                                    <ul class="dropdown-menu dropdown-menu-end">
+                                        <li><a class="dropdown-item" href="javascript:void(0)" data-bs-toggle="modal"
+                                                data-bs-target="#contactDetailsModal" (click)="viewInquiry(inquiry)">View & Reply</a></li>
+                                        @if (inquiry.status !== 'Closed') {
+                                            <li><a class="dropdown-item" href="javascript:void(0)" (click)="markClosed(inquiry.id)">Mark as Closed</a></li>
+                                        }
+                                        <li><a class="dropdown-item text-danger" href="javascript:void(0)" (click)="deleteInquiry(inquiry.id)">Delete</a></li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                    } @empty {
+                        <tr>
+                            <td colspan="5" class="text-center text-muted py-5">
+                                <i class="bi bi-inbox fs-3 d-block mb-2" aria-hidden="true"></i>
+                                No inquiries found.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
         </div>
-
-        <!-- NEW PANE -->
-        <div class="tab-pane fade" id="new-pane" role="tabpanel" tabindex="0">
-            <section class="panel">
-                <div class="panel-header">
-                    <h2 class="h5 mb-1 section-title">New Inquiries</h2>
-                </div>
-                <div class="table-responsive">
-                    <table class="table align-middle mb-0">
-                        <!-- Table content for New inquiries -->
-                        <tbody>
-                            <tr class="fw-bold">
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <span class="status-dot bg-primary me-2"></span>
-                                        <div>
-                                            <p class="mb-0">Manoj Kumar</p>
-                                            <p class="text-muted small mb-0">manoj@example.com</p>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>Question about my order #ORD-001250</td>
-                                <td>July 18, 2026</td>
-                                <td class="text-end">
-                                    <div class="btn-group">
-                                        <button type="button" class="btn btn-info dropdown-toggle btn-sm"
-                                            data-bs-toggle="dropdown" aria-expanded="false">Action</button>
-                                        <ul class="dropdown-menu">
-                                            <li><a class="dropdown-item" data-bs-toggle="modal"
-                                                    data-bs-target="#contactDetailsModal">View & Reply</a></li>
-                                            <li><a class="dropdown-item" href="#">Mark as Replied</a></li>
-                                            <li><a class="dropdown-item text-danger" href="#">Delete</a></li>
-                                        </ul>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-        </div>
-
-        <!-- REPLIED PANE -->
-        <div class="tab-pane fade" id="replied-pane" role="tabpanel" tabindex="0">
-            <p class="text-center text-muted p-4">No replied inquiries.</p>
-        </div>
-
-        <!-- CLOSED PANE -->
-        <div class="tab-pane fade" id="closed-pane" role="tabpanel" tabindex="0">
-            <p class="text-center text-muted p-4">No closed inquiries.</p>
-        </div>
-    </div>
+    </section>
 
     <!-- CONTACT DETAILS MODAL -->
     <div class="modal fade" id="contactDetailsModal" aria-hidden="true" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered modal-xl">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Inquiry from Manoj Kumar</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="row">
-                        <div class="col-md-5">
-                            <h6>Details</h6>
-                            <p><strong>From:</strong> Manoj Kumar &lt;manoj@example.com&gt;<br>
-                                <strong>Date:</strong> July 18, 2026<br>
-                                <strong>Subject:</strong> Question about my order #ORD-001250
-                            </p>
-                            <hr>
-                            <h6>Conversation</h6>
-                            <!-- Customer Message -->
-                            <div class="p-3 bg-light rounded mb-3">
-                                <p class="small text-muted mb-1">Manoj Kumar says:</p>
-                                <p>Hello, I have a question regarding my recent order. Can you please provide an update
-                                    on the shipping status? Thank you.</p>
+            @if (selectedInquiry(); as inquiry) {
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Inquiry from {{ inquiry.name }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-5">
+                                <h6>Details</h6>
+                                <p><strong>From:</strong> {{ inquiry.name }} &lt;{{ inquiry.email }}&gt;<br>
+                                    <strong>Date:</strong> {{ inquiry.date }}<br>
+                                    <strong>Subject:</strong> {{ inquiry.subject }}
+                                </p>
+                                <hr>
+                                <h6>Conversation</h6>
+                                <div class="p-3 bg-light rounded mb-3">
+                                    <p class="small text-muted mb-1">{{ inquiry.name }} says:</p>
+                                    <p class="mb-0">{{ inquiry.message }}</p>
+                                </div>
+                                @if (inquiry.reply) {
+                                    <div class="p-3 bg-primary-subtle rounded mb-3">
+                                        <p class="small text-muted mb-1">You replied:</p>
+                                        <p class="mb-0">{{ inquiry.reply }}</p>
+                                    </div>
+                                }
                             </div>
-                            <!-- Admin Reply (Example) -->
-                            <div class="p-3 bg-primary-subtle rounded mb-3">
-                                <p class="small text-muted mb-1">You replied:</p>
-                                <p>Hi Manoj, your order has been shipped and you can track it here: [link].</p>
-                            </div>
-                        </div>
-                        <div class="col-md-7">
-                            <h6>Reply</h6>
-                            <div class="mb-3">
-                                <textarea class="form-control" rows="8"
-                                    placeholder="Type your reply here..."></textarea>
+                            <div class="col-md-7">
+                                <h6>Reply</h6>
+                                <div class="mb-3">
+                                    <textarea class="form-control" rows="8" placeholder="Type your reply here..."
+                                        [ngModel]="replyText()" (ngModelChange)="replyText.set($event)"></textarea>
+                                </div>
                             </div>
                         </div>
                     </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" (click)="sendReply()" data-bs-dismiss="modal"><i class="bi bi-send"></i> Send Reply</button>
+                    </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary"><i class="bi bi-send"></i> Send Reply</button>
-                </div>
-            </div>
+            }
         </div>
     </div>
 </div>

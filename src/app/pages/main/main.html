@@ -1,9 +1,9 @@
 <div class="admin-shell">
-  <div class="sidebar-backdrop" data-sidebar-close></div>
+  <div class="sidebar-backdrop" (click)="closeSidebar()"></div>
 
   <aside class="admin-sidebar" id="adminSidebar" aria-label="Main navigation">
     <div class="sidebar-header">
-      <a class="brand-mark" routerLink="/main/dashboard" aria-label="adminHMD ">
+      <a class="brand-mark" routerLink="/main/dashboard" (click)="closeSidebar()" aria-label="adminHMD ">
         <span class="brand-icon"><i class="bi bi-grid-1x2-fill" aria-hidden="true"></i></span>
         <span class="brand-copy">
           <span class="brand-title">Baba Ecom</span>
@@ -14,82 +14,20 @@
 
     <nav class="sidebar-nav">
 
-      <a class="nav-link" routerLink="/main/dashboard" routerLinkActive="active" aria-current="page">
-        <span class="nav-icon"><i class="bi bi-speedometer2" aria-hidden="true"></i></span>
-        <span class="nav-text">Dashboard</span>
-      </a>
-
-      <a class="nav-link" routerLink="/main/users" routerLinkActive="active">
-        <span class="nav-icon"><i class="bi bi-people" aria-hidden="true"></i></span>
-        <span class="nav-text">Users</span>
-      </a>
-
-      <a class="nav-link" routerLink="/main/orders" routerLinkActive="active">
-        <span class="nav-icon"><i class="bi bi-box-seam" aria-hidden="true"></i></span>
-        <span class="nav-text">Orders</span>
-      </a>
-
-      <a class="nav-link" routerLink="/main/category" routerLinkActive="active">
-        <span class="nav-icon"><i class="bi bi-flower1" aria-hidden="true"></i></span>
-        <span class="nav-text">Category</span>
-      </a>
-
-      <a class="nav-link" routerLink="/main/sub-category" routerLinkActive="active">
-        <span class="nav-icon"><i class="bi bi-flower2" aria-hidden="true"></i></span>
-        <span class="nav-text">Sub Category</span>
-      </a>
-
-      <a class="nav-link" routerLink="/main/products" routerLinkActive="active">
-        <span class="nav-icon"><i class="bi bi-boxes" aria-hidden="true"></i></span>
-        <span class="nav-text">Products</span>
-      </a>
-
-      <a class="nav-link" routerLink="/main/profile" routerLinkActive="active">
-        <span class="nav-icon"><i class="bi bi-person-badge" aria-hidden="true"></i></span>
-        <span class="nav-text">Profile</span>
-      </a>
-
-      <a class="nav-link" routerLink="/main/sliders" routerLinkActive="active">
-        <span class="nav-icon"><i class="bi bi-card-image" aria-hidden="true"></i></span>
-        <span class="nav-text">Sliders</span>
-      </a>
-
-      <a class="nav-link" routerLink="/main/returns" routerLinkActive="active">
-        <span class="nav-icon"><i class="bi bi-arrow-return-left" aria-hidden="true"></i></span>
-        <span class="nav-text">Returns</span>
-      </a>
-
-      <a class="nav-link" routerLink="/main/wishlist" routerLinkActive="active">
-        <span class="nav-icon"><i class="bi bi-heart" aria-hidden="true"></i></span>
-        <span class="nav-text">Wishlist</span>
-      </a>
-
-      <a class="nav-link" routerLink="/main/contact" routerLinkActive="active">
-        <span class="nav-icon"><i class="bi bi-chat-right-text" aria-hidden="true"></i></span>
-        <span class="nav-text">Contact Us</span>
-      </a>
-
-      <a class="nav-link" routerLink="/main/offers" routerLinkActive="active">
-        <span class="nav-icon"><i class="bi bi-gift" aria-hidden="true"></i></span>
-        <span class="nav-text">Offers</span>
-      </a>
-
-       <a class="nav-link" routerLink="/main/address" routerLinkActive="active">
-        <span class="nav-icon"><i class="bi bi-building-add" aria-hidden="true"></i></span>
-        <span class="nav-text">Address</span>
-      </a>
-
-      <a class="nav-link" routerLink="/main/setting" routerLinkActive="active">
-        <span class="nav-icon"><i class="bi bi-gear" aria-hidden="true"></i></span>
-        <span class="nav-text">Settings</span>
-      </a>
+      @for (item of navItems(); track item.route) {
+        <a class="nav-link" [routerLink]="item.route" routerLinkActive="active" (click)="closeSidebar()"
+          [attr.aria-current]="item.route === '/main/dashboard' ? 'page' : null">
+          <span class="nav-icon"><i class="bi {{ item.icon }}" aria-hidden="true"></i></span>
+          <span class="nav-text">{{ item.label }}</span>
+        </a>
+      }
 
     </nav>
 
     <div class="sidebar-user">
       <img class="avatar-img avatar-md sidebar-user-avatar" src="../assets/images/avatar/avatar.jpg" alt="">
-      <strong>Manoj Kumar</strong>
-      <small>Active Workspace</small>
+      <strong>{{ currentUser()?.name || 'Guest' }}</strong>
+      <small>{{ currentUser()?.role === 'seller' ? 'Seller Workspace' : 'Super Admin Workspace' }}</small>
     </div>
 
     <div class="sidebar-footer">
@@ -104,22 +42,54 @@
   <div class="admin-main">
     <nav class="navbar admin-navbar navbar-expand bg-white">
       <div class="container-fluid px-3 px-lg-4">
-        <button class="sidebar-toggle" type="button" data-sidebar-toggle aria-controls="adminSidebar"
-          aria-expanded="true" aria-label="Toggle sidebar">
+        <button class="sidebar-toggle" type="button" (click)="toggleSidebar()" aria-controls="adminSidebar"
+          [attr.aria-expanded]="sidebarExpanded()" aria-label="Toggle sidebar">
           <span></span>
           <span></span>
           <span></span>
         </button>
 
-        <form class="d-none d-md-flex ms-3 flex-grow-1" role="search">
+        <form class="d-none d-md-flex ms-3 flex-grow-1 position-relative global-search" role="search" (submit)="$event.preventDefault()">
           <input class="form-control search-input" type="search" placeholder="Search users, orders, reports"
-            aria-label="Search">
+            aria-label="Search" [ngModel]="searchTerm()" name="globalSearchDesktop"
+            (ngModelChange)="onSearchChange($event)" (keydown)="onSearchKeydown($event)">
+          @if (searchTerm()) {
+            <button type="button" class="search-clear-btn" aria-label="Clear search" (click)="clearSearch()">
+              <i class="bi bi-x-circle-fill" aria-hidden="true"></i>
+            </button>
+          }
+          @if (showSearchDropdown()) {
+            <div class="search-dropdown">
+              @if (searchResults().length) {
+                @for (result of searchResults(); track result.route + result.label; let i = $index) {
+                  <button type="button" class="search-result-item" [class.active]="i === activeResultIndex()"
+                    (click)="selectSearchResult(result)">
+                    <span class="search-result-icon"><i class="bi {{ result.icon }}" aria-hidden="true"></i></span>
+                    <span class="search-result-copy">
+                      <span class="search-result-label">{{ result.label }}</span>
+                      <span class="search-result-sublabel">{{ result.sublabel }}</span>
+                    </span>
+                    <span class="search-result-type badge text-bg-secondary">{{ result.type }}</span>
+                  </button>
+                }
+              } @else {
+                <div class="search-empty">
+                  <i class="bi bi-search" aria-hidden="true"></i>
+                  No results for "{{ searchTerm() }}"
+                </div>
+              }
+            </div>
+          }
         </form>
 
         <div class="navbar-actions ms-auto">
-          <button class="icon-button theme-toggle" type="button" data-theme-toggle aria-label="Switch color theme"
-            title="Switch color theme">
-            <i class="bi bi-moon-stars" data-theme-icon aria-hidden="true"></i>
+          <button class="icon-button d-md-none" type="button" (click)="toggleMobileSearch()" aria-label="Toggle search">
+            <i class="bi bi-search" aria-hidden="true"></i>
+          </button>
+          <button class="icon-button theme-toggle" type="button" (click)="toggleTheme()"
+            [attr.aria-label]="theme() === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'"
+            [attr.title]="theme() === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'">
+            <i [class]="theme() === 'dark' ? 'bi bi-sun' : 'bi bi-moon-stars'" aria-hidden="true"></i>
           </button>
           <div class="dropdown">
             <button class="icon-button" type="button" data-bs-toggle="dropdown" aria-expanded="false"
@@ -148,21 +118,52 @@
             <button class="profile-button dropdown-toggle" type="button" data-bs-toggle="dropdown"
               aria-expanded="false">
               <img class="avatar-img avatar-sm" src="../assets/images/avatar/avatar.jpg" alt="A">
-              <span class="profile-name d-none d-sm-inline">Manoj kumar</span>
+              <span class="profile-name d-none d-sm-inline">{{ currentUser()?.name || 'Guest' }}</span>
             </button>
             <ul class="dropdown-menu dropdown-menu-end">
-              <li><a class="dropdown-item" routerLink="/">Login</a></li>
               <li><a class="dropdown-item" routerLink="/main/profile">Profile</a></li>
-              <li><a class="dropdown-item" routerLink="/main/settings">Account settings</a></li>
+              <li><a class="dropdown-item" routerLink="/main/setting">Account settings</a></li>
               <li>
                 <hr class="dropdown-divider">
               </li>
-              <li><a class="dropdown-item" routerLink="/">Sign out</a></li>
+              <li><a class="dropdown-item" href="javascript:void(0)" (click)="logout()">Sign out</a></li>
             </ul>
           </div>
         </div>
       </div>
     </nav>
+
+    @if (mobileSearchOpen()) {
+      <div class="mobile-search-bar d-md-none position-relative">
+        <div class="container-fluid px-3">
+          <input class="form-control search-input" type="search" placeholder="Search users, orders, reports"
+            aria-label="Search" autofocus [ngModel]="searchTerm()" name="globalSearchMobile"
+            (ngModelChange)="onSearchChange($event)" (keydown)="onSearchKeydown($event)">
+          @if (showSearchDropdown()) {
+            <div class="search-dropdown search-dropdown-mobile">
+              @if (searchResults().length) {
+                @for (result of searchResults(); track result.route + result.label; let i = $index) {
+                  <button type="button" class="search-result-item" [class.active]="i === activeResultIndex()"
+                    (click)="selectSearchResult(result)">
+                    <span class="search-result-icon"><i class="bi {{ result.icon }}" aria-hidden="true"></i></span>
+                    <span class="search-result-copy">
+                      <span class="search-result-label">{{ result.label }}</span>
+                      <span class="search-result-sublabel">{{ result.sublabel }}</span>
+                    </span>
+                    <span class="search-result-type badge text-bg-secondary">{{ result.type }}</span>
+                  </button>
+                }
+              } @else {
+                <div class="search-empty">
+                  <i class="bi bi-search" aria-hidden="true"></i>
+                  No results for "{{ searchTerm() }}"
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    }
     <main class="dashboard-content">
 
 

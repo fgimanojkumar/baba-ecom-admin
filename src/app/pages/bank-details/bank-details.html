@@ -1,0 +1,75 @@
+<div class="container-fluid px-3 px-lg-4 py-4">
+    <!-- PAGE HEADING -->
+    <div class="page-heading">
+        <div class="page-heading-copy">
+            <span class="page-icon"><i class="bi bi-bank" aria-hidden="true"></i></span>
+            <div>
+                <h1 class="h5 mb-1 d-flex align-items-center gap-2">Bank Details <app-page-info heading="Bank Details" text="Add or update the bank account used to receive your order payouts and refunds. Changing details will require re-verification before your next payout."></app-page-info></h1>
+                <p class="text-muted mb-0">Manage the bank account used to receive your payouts.</p>
+            </div>
+        </div>
+        <div class="heading-actions">
+            <span class="badge verify-badge" [ngClass]="bankDetails().verified ? 'text-bg-success' : 'text-bg-warning'">
+                <i class="bi" [ngClass]="bankDetails().verified ? 'bi-patch-check' : 'bi-hourglass-split'" aria-hidden="true"></i>
+                {{ bankDetails().verified ? 'Verified' : 'Pending Verification' }}
+            </span>
+        </div>
+    </div>
+
+    @if (savedMessage()) {
+        <div class="alert alert-success py-2 small mt-3 mb-0">Bank details saved. Verification is pending review.</div>
+    }
+
+    <section class="row g-3 mt-1">
+        <div class="col-12 col-xl-8">
+            <form class="panel" [formGroup]="form" (ngSubmit)="save()">
+                <div class="panel-header">
+                    <div>
+                        <h2 class="h5 mb-1 section-title"><i class="bi bi-credit-card-2-front" aria-hidden="true"></i><span> Payout Account</span></h2>
+                        <p class="text-muted mb-0">This account will receive your order settlements.</p>
+                    </div>
+                </div>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Account Holder Name</label>
+                        <input type="text" class="form-control" formControlName="accountHolderName" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Bank Name</label>
+                        <input type="text" class="form-control" formControlName="bankName" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Account Number</label>
+                        <input type="text" class="form-control" formControlName="accountNumber" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">IFSC Code</label>
+                        <input type="text" class="form-control" formControlName="ifscCode" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Branch Name</label>
+                        <input type="text" class="form-control" formControlName="branchName">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">UPI ID</label>
+                        <input type="text" class="form-control" formControlName="upiId">
+                    </div>
+                </div>
+                <button class="btn btn-primary mt-3" type="submit">
+                    <i class="bi bi-check2-circle" aria-hidden="true"></i> Save Bank Details
+                </button>
+            </form>
+        </div>
+        <div class="col-12 col-xl-4">
+            <div class="panel h-100">
+                <div class="panel-header">
+                    <div>
+                        <h2 class="h5 mb-1 section-title"><i class="bi bi-shield-check" aria-hidden="true"></i><span> Why we ask</span></h2>
+                    </div>
+                </div>
+                <p class="text-muted small mb-2">Your bank details are used only to process order payouts and refunds settlements.</p>
+                <p class="text-muted small mb-0">Any change to your account details will require re-verification before your next payout is processed.</p>
+            </div>
+        </div>
+    </section>
+</div>
