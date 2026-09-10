@@ -1,17 +1,18 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormArray } from '@angular/forms';
 import { Product } from './product.model';
 import { ProductService } from './product.service';
-import { Loader } from '../../shared/lib/loader/loader';
 import { Toggle } from '../../shared/lib/toggle/toggle';
 import { Dropdown } from '../../shared/lib/dropdown/dropdown';
+
+import { PageInfo } from '../../shared/lib/page-info/page-info';
 
 @Component({
   selector: 'app-products',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, Dropdown, Loader, Toggle],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, Dropdown, Toggle, PageInfo],
   templateUrl: './products.html',
   styleUrl: './products.scss',
 })
@@ -20,15 +21,26 @@ export class Products {
   productForm: FormGroup;
   isAddNewProduct = signal(false);
   isView = signal(true);
+  isViewProduct = signal(false);
   isEditMode = signal(false);
   selectedProduct = signal<Product | null>(null);
   activeTab = signal('general');
   productStatus: any = ["Draft", "Active", "Inactive"]
+  searchTerm = signal('');
 
   private fb = inject(FormBuilder);
   private productService = inject(ProductService);
 
   products = toSignal(this.productService.products$, { initialValue: [] });
+
+  private matchesSearch(product: Product): boolean {
+    const term = this.searchTerm().trim().toLowerCase();
+    return !term || product.name().toLowerCase().includes(term) || product.sku().toLowerCase().includes(term);
+  }
+
+  activeProducts = computed(() => this.products().filter((p) => p.status() === 'ACTIVE' && this.matchesSearch(p)));
+  inactiveProducts = computed(() => this.products().filter((p) => p.status() === 'INACTIVE' && this.matchesSearch(p)));
+  draftProducts = computed(() => this.products().filter((p) => p.status() === 'DRAFT' && this.matchesSearch(p)));
 
   constructor() {
     this.productForm = this.fb.group({});
@@ -41,6 +53,7 @@ export class Products {
     this.productForm = this.fb.group({
       id: [rawProduct.id],
       barcode: [rawProduct.barcode],
+      hsnCode: [rawProduct.hsnCode],
       name: [rawProduct.name, Validators.required],
       slug: [rawProduct.slug],
       shortDescription: [rawProduct.shortDescription],
@@ -185,7 +198,7 @@ export class Products {
 
   getDefaultProductData() {
     return {
-      id: '', sku: '', barcode: '', name: '', slug: '', shortDescription: '',
+      id: '', sku: '', barcode: '', hsnCode: '', name: '', slug: '', shortDescription: '',
       description: '', brand: { id: '', name: '' }, manufacturer: '',
       category: { id: '', name: '' }, subCategory: { id: '', name: '' },
       collections: [], tags: [], gender: 'Unisex', ageGroup: '18+', skinType: [],
@@ -210,6 +223,7 @@ export class Products {
   openAdd() {
     this.isAddNewProduct.set(true);
     this.isView.set(false);
+    this.isViewProduct.set(false);
     this.isEditMode.set(false);
     this.selectedProduct.set(null);
     this.activeTab.set('active');
@@ -217,10 +231,21 @@ export class Products {
   }
 
   openEditModal(product: Product) {
+    this.isAddNewProduct.set(true);
+    this.isView.set(false);
+    this.isViewProduct.set(false);
     this.isEditMode.set(true);
     this.selectedProduct.set(product);
     this.activeTab.set('active');
     this.initForm(product);
+  }
+
+  openViewModal(product: Product) {
+    this.isAddNewProduct.set(false);
+    this.isView.set(false);
+    this.isViewProduct.set(true);
+    this.isEditMode.set(false);
+    this.selectedProduct.set(product);
   }
 
   saveProduct() {
@@ -289,6 +314,81 @@ export class Products {
     }
   }
 
+  exportProductsCsv(): void {
+    const header = ['SKU', 'Name', 'Category', 'MRP', 'Selling Price', 'Stock', 'Status'];
+    const rows = this.products().map((p) => [
+      p.sku(), p.name(), p.category()?.name ?? '', p.price().mrp, p.price().sellingPrice, p.inventory().stock, p.status(),
+    ]);
+    const csv = [header, ...rows].map((row) => row.map((cell) => `"${cell}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'products-export.csv';
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
+  importProductsCsv(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) {
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const text = reader.result as string;
+      const lines = text.split(/\r?\n/).filter((line) => line.trim().length > 0);
+      const [, ...dataLines] = lines;
+
+      for (const line of dataLines) {
+        const cols = line.split(',').map((cell) => cell.replace(/^"|"$/g, '').trim());
+        const [sku, name, categoryName, mrp, sellingPrice, stock, status] = cols;
+        if (!name) {
+          continue;
+        }
+
+        this.productService.addProduct({
+          sku: sku || `SKU-${Date.now()}`,
+          name,
+          slug: name.toLowerCase().replace(/\s+/g, '-'),
+          shortDescription: '',
+          description: '',
+          brand: { id: '', name: '' },
+          manufacturer: '',
+          category: { id: '', name: categoryName || 'Uncategorized' },
+          subCategory: { id: '', name: '' },
+          collections: [],
+          tags: [],
+          gender: 'Unisex',
+          ageGroup: '',
+          skinType: [],
+          images: [],
+          videos: [],
+          price: { mrp: Number(mrp) || 0, sellingPrice: Number(sellingPrice) || 0, costPrice: 0, currency: 'INR', discount: { type: 'percentage', value: 0 }, tax: { gst: 18 } },
+          inventory: { trackInventory: true, stock: Number(stock) || 0, minStock: 5, maxOrderQuantity: 10, allowBackorder: false },
+          variants: [],
+          specifications: {},
+          ingredients: [],
+          benefits: [],
+          howToUse: [],
+          warnings: [],
+          shipping: { weight: 0, length: 0, width: 0, height: 0, freeShipping: false, shippingCharge: 0 },
+          returnPolicy: { returnable: true, returnDays: 7 },
+          warranty: { available: false, duration: null },
+          seo: { title: name, description: '', keywords: [] },
+          rating: { average: 0, totalReviews: 0, totalRatings: 0 },
+          sales: { sold: 0, wishlistCount: 0, viewCount: 0 },
+          offers: [],
+          status: status || 'DRAFT',
+        });
+      }
+    };
+    reader.readAsText(file);
+    input.value = '';
+  }
+
   setPrimaryImage(selectedIndex: number): void {
     this.images.controls.forEach((control, index) => {
       control.get('isPrimary')?.setValue(index === selectedIndex);
@@ -297,12 +397,19 @@ export class Products {
 
 
 cancelAllProduct() {
-      this.isAddNewProduct.set(false);
+    this.isAddNewProduct.set(false);
     this.isView.set(true);
+    this.isViewProduct.set(false);
     this.isEditMode.set(false);
     this.selectedProduct.set(null);
     this.activeTab.set('active');
 }
+
+  closeProductView() {
+    this.isViewProduct.set(false);
+    this.isView.set(true);
+    this.selectedProduct.set(null);
+  }
 
 
 }

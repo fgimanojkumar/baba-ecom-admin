@@ -112,6 +112,7 @@ export class Product {
   id: WritableSignal<string>;
   sku: WritableSignal<string>;
   barcode: WritableSignal<string>;
+  hsnCode: WritableSignal<string>;
   name: WritableSignal<string>;
   slug: WritableSignal<string>;
   shortDescription: WritableSignal<string>;
@@ -152,6 +153,7 @@ export class Product {
     this.id = signal(productData.id);
     this.sku = signal(productData.sku);
     this.barcode = signal(productData.barcode);
+    this.hsnCode = signal(productData.hsnCode ?? '');
     this.name = signal(productData.name);
     this.slug = signal(productData.slug);
     this.shortDescription = signal(productData.shortDescription);

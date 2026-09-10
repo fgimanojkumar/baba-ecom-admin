@@ -1,0 +1,70 @@
+<div class="container-fluid px-3 px-lg-4 py-4">
+    <!-- PAGE HEADING -->
+    <div class="page-heading">
+        <div class="page-heading-copy">
+            <span class="page-icon"><i class="bi bi-truck" aria-hidden="true"></i></span>
+            <div>
+                <h1 class="h5 mb-1 d-flex align-items-center gap-2">Shipping & Logistics <app-page-info heading="Shipping & Logistics" text="View courier partners and check pincode delivery serviceability against your registered cities."></app-page-info></h1>
+                <p class="text-muted mb-0">Courier partners and pincode serviceability lookup.</p>
+            </div>
+        </div>
+    </div>
+
+    <section class="row g-3 mt-1">
+        <div class="col-12 col-xl-7">
+            <div class="panel">
+                <div class="panel-header">
+                    <h2 class="h5 mb-1 section-title"><i class="bi bi-box-seam" aria-hidden="true"></i> Courier Partners</h2>
+                </div>
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th scope="col">Courier</th>
+                                <th scope="col">Avg. Delivery</th>
+                                <th scope="col">COD</th>
+                                <th scope="col">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (courier of couriers; track courier.name) {
+                                <tr>
+                                    <td class="fw-semibold">{{ courier.name }}</td>
+                                    <td>{{ courier.avgDeliveryDays }}</td>
+                                    <td>{{ courier.codAvailable ? 'Yes' : 'No' }}</td>
+                                    <td><span class="badge" [ngClass]="courier.status === 'Active' ? 'text-bg-success' : 'text-bg-secondary'">{{ courier.status }}</span></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-xl-5">
+            <div class="panel h-100">
+                <div class="panel-header">
+                    <h2 class="h5 mb-1 section-title"><i class="bi bi-geo-alt" aria-hidden="true"></i> Pincode Serviceability</h2>
+                </div>
+                <p class="text-muted small">Check whether a delivery pincode is serviceable based on your registered cities.</p>
+                <div class="d-flex gap-2 mb-3">
+                    <input class="form-control" type="text" placeholder="Enter pincode..." maxlength="6"
+                        [ngModel]="pincodeInput()" (ngModelChange)="pincodeInput.set($event)" (keydown.enter)="checkServiceability()">
+                    <button type="button" class="btn btn-primary" (click)="checkServiceability()">Check</button>
+                </div>
+                @if (checkedResult(); as result) {
+                    @if (result.found) {
+                        <div class="checker-result bg-success-subtle text-success-emphasis">
+                            <i class="bi bi-check-circle" aria-hidden="true"></i>
+                            Pincode {{ result.pincode }} is serviceable — {{ result.city }}, {{ result.state }}.
+                        </div>
+                    } @else {
+                        <div class="checker-result bg-danger-subtle text-danger-emphasis">
+                            <i class="bi bi-x-circle" aria-hidden="true"></i>
+                            Pincode {{ result.pincode }} is not serviceable yet.
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </section>
+</div>

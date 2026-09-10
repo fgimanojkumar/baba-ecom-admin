@@ -3,57 +3,130 @@
         <div class="page-heading-copy">
             <span class="page-icon"><i class="bi bi-gear" aria-hidden="true"></i></span>
             <div>
-                <h1 class="h5 mb-1">Settings</h1>
-                <p class="text-muted mb-0">Customize workspace defaults, security options, and notification preferences.
+                <h1 class="h5 mb-1 d-flex align-items-center gap-2">Settings <app-page-info heading="Settings" text="Configure store details, tax, shipping defaults, security policy, and export or reset demo data."></app-page-info></h1>
+                <p class="text-muted mb-0">Customize store defaults, tax, shipping, and notification preferences.
                 </p>
             </div>
         </div>
 
     </div>
 
-    <section class="row g-3">
-        <div class="col-12 col-xl-6">
-            <form class="panel needs-validation" novalidate="">
+    @if (savedMessage()) {
+        <div class="alert alert-success py-2 small mt-3 mb-0">Settings saved successfully.</div>
+    }
+
+    <section class="row g-3 mt-1">
+        <div class="col-12 col-xl-7">
+            <form class="panel needs-validation" [formGroup]="form" (ngSubmit)="save()">
                 <div class="panel-header">
                     <div>
-                        <h2 class="h5 mb-1 section-title"><i class="bi bi-sliders" aria-hidden="true"></i><span>General
+                        <h2 class="h5 mb-1 section-title"><i class="bi bi-sliders" aria-hidden="true"></i><span>Store
                                 Settings</span></h2>
-                        <p class="text-muted mb-0">Configure workspace identity and defaults.</p>
+                        <p class="text-muted mb-0">Configure store identity, tax, and shipping defaults.</p>
                     </div>
                 </div>
-                <div class="mb-3"><label class="form-label" for="workspaceName">Workspace name</label><input
-                        class="form-control" id="workspaceName" type="text" value="adminHMD Workspace" required="">
-                    <div class="invalid-feedback">Workspace name is required.</div>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label" for="storeName">Store Name</label>
+                        <input class="form-control" id="storeName" type="text" formControlName="storeName" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="currency">Currency</label>
+                        <select class="form-select" id="currency" formControlName="currency">
+                            <option value="INR">INR (₹)</option>
+                            <option value="USD">USD ($)</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="supportEmail">Support Email</label>
+                        <input class="form-control" id="supportEmail" type="email" formControlName="supportEmail" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="supportPhone">Support Phone</label>
+                        <input class="form-control" id="supportPhone" type="text" formControlName="supportPhone" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="gstNumber">GST Number</label>
+                        <input class="form-control" id="gstNumber" type="text" formControlName="gstNumber">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="address">Store Address</label>
+                        <input class="form-control" id="address" type="text" formControlName="address">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="defaultShippingCharge">Default Shipping Charge (₹)</label>
+                        <input class="form-control" id="defaultShippingCharge" type="number" formControlName="defaultShippingCharge">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="freeShippingThreshold">Free Shipping Above (₹)</label>
+                        <input class="form-control" id="freeShippingThreshold" type="number" formControlName="freeShippingThreshold">
+                    </div>
                 </div>
-                <div class="mb-3"><label class="form-label" for="defaultLanguage">Default language</label><select
-                        class="form-select" id="defaultLanguage">
-                        <option selected="">English</option>
-                        <option>Bangla</option>
-                        <option>Spanish</option>
-                    </select></div>
-                <button class="btn btn-primary" type="submit"><i class="bi bi-check2-circle" aria-hidden="true"></i>
+                <button class="btn btn-primary mt-3" type="submit"><i class="bi bi-check2-circle" aria-hidden="true"></i>
                     Save Settings</button>
             </form>
         </div>
-        <div class="col-12 col-xl-6">
-            <div class="panel h-100">
+        <div class="col-12 col-xl-5">
+            <div class="panel h-100" [formGroup]="form">
                 <div class="panel-header">
                     <div>
                         <h2 class="h5 mb-1 section-title"><i class="bi bi-toggles2"
                                 aria-hidden="true"></i><span>Preferences</span></h2>
-                        <p class="text-muted mb-0">Control notifications and security options.</p>
+                        <p class="text-muted mb-0">Control notifications and platform mode.</p>
                     </div>
                 </div>
                 <div class="settings-list">
                     <label class="settings-row"><span><strong>Email alerts</strong><small>Receive important account
                                 updates.</small></span><input class="form-check-input" type="checkbox"
-                            checked=""></label>
-                    <label class="settings-row"><span><strong>Weekly reports</strong><small>Send summary reports every
-                                Monday.</small></span><input class="form-check-input" type="checkbox"
-                            checked=""></label>
-                    <label class="settings-row"><span><strong>Two-factor authentication</strong><small>Require extra
-                                verification for admins.</small></span><input class="form-check-input"
-                            type="checkbox"></label>
+                            formControlName="emailAlerts"></label>
+                    <label class="settings-row"><span><strong>SMS alerts</strong><small>Send SMS updates for critical
+                                events.</small></span><input class="form-check-input" type="checkbox"
+                            formControlName="smsAlerts"></label>
+                    <label class="settings-row"><span><strong>Maintenance mode</strong><small>Temporarily disable the
+                                storefront for customers.</small></span><input class="form-check-input"
+                            type="checkbox" formControlName="maintenanceMode"></label>
+                </div>
+            </div>
+        </div>
+        <div class="col-12">
+            <div class="panel" [formGroup]="form">
+                <div class="panel-header">
+                    <div>
+                        <h2 class="h5 mb-1 section-title"><i class="bi bi-shield-lock" aria-hidden="true"></i><span>Security Policy</span></h2>
+                        <p class="text-muted mb-0">Platform-wide authentication and session rules.</p>
+                    </div>
+                </div>
+                <div class="row g-3">
+                    <div class="col-12 col-md-4 d-flex align-items-center">
+                        <label class="settings-row w-100"><span><strong>Require Two-Factor Authentication</strong><small>Force 2FA for all admin and seller logins.</small></span>
+                            <input class="form-check-input" type="checkbox" formControlName="twoFactorRequired"></label>
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <label class="form-label" for="sessionTimeoutMinutes">Session Timeout (minutes)</label>
+                        <input class="form-control" id="sessionTimeoutMinutes" type="number" formControlName="sessionTimeoutMinutes" min="5">
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <label class="form-label" for="passwordExpiryDays">Password Expiry (days)</label>
+                        <input class="form-control" id="passwordExpiryDays" type="number" formControlName="passwordExpiryDays" min="0">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12">
+            <div class="panel">
+                <div class="panel-header">
+                    <div>
+                        <h2 class="h5 mb-1 section-title"><i class="bi bi-database" aria-hidden="true"></i><span>Data Management</span></h2>
+                        <p class="text-muted mb-0">Export a full backup of the current demo data, or reset everything back to defaults.</p>
+                    </div>
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                    <button type="button" class="btn btn-outline-secondary btn-sm" (click)="exportAllData()">
+                        <i class="bi bi-download" aria-hidden="true"></i> Export All Data (JSON)
+                    </button>
+                    <button type="button" class="btn btn-outline-danger btn-sm" (click)="resetDemoData()">
+                        <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i> Reset to Demo Data
+                    </button>
                 </div>
             </div>
         </div>

@@ -1,0 +1,51 @@
+.td-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: rgba(99, 102, 241, 0.15);
+  color: #6366f1;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.table-search {
+  min-width: 220px;
+}
+
+.filters-row {
+  width: 100%;
+  justify-content: flex-end;
+}
+
+.status-filter {
+  min-width: 170px;
+  width: auto;
+}
+
+@media (max-width: 767.98px) {
+  .filters-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .status-filter {
+    width: 100%;
+    min-width: 0;
+  }
+}
+
+.bulk-action-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  padding: 0.6rem 1rem;
+  margin: 0.5rem 0 0;
+  background: rgba(99, 102, 241, 0.08);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  border-radius: 8px;
+}

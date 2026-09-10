@@ -1,0 +1,235 @@
+<div class="container-fluid px-3 px-lg-4 py-4">
+    <!-- PAGE HEADING -->
+    <div class="page-heading">
+        <div class="page-heading-copy">
+            <span class="page-icon"><i class="bi bi-shop" aria-hidden="true"></i></span>
+            <div>
+                <h1 class="h5 mb-1 d-flex align-items-center gap-2">Sellers <app-page-info heading="Sellers" text="Approve, manage, and monitor marketplace sellers, their commission rates, and performance scorecards."></app-page-info></h1>
+                <p class="text-muted mb-0">Onboard, approve, and manage marketplace sellers.</p>
+            </div>
+        </div>
+        <div class="heading-actions">
+            <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#sellerModal" (click)="openAdd()">
+                <i class="bi bi-plus-circle" aria-hidden="true"></i>
+                Add New Seller
+            </button>
+        </div>
+    </div>
+
+    <!-- SELLER SUMMARY -->
+    <section class="row g-3 mt-1" aria-label="Seller summary">
+        <div class="col-12 col-sm-6 col-xl-3">
+            <article class="metric-card metric-primary">
+                <div class="metric-top">
+                    <span class="metric-label">Total Sellers</span>
+                    <span class="metric-icon"><i class="bi bi-shop-window" aria-hidden="true"></i></span>
+                </div>
+                <div class="metric-value">{{ totalSellers() }}</div>
+            </article>
+        </div>
+        <div class="col-12 col-sm-6 col-xl-3">
+            <article class="metric-card metric-success">
+                <div class="metric-top">
+                    <span class="metric-label">Approved</span>
+                    <span class="metric-icon"><i class="bi bi-check2-circle" aria-hidden="true"></i></span>
+                </div>
+                <div class="metric-value">{{ approvedSellers() }}</div>
+            </article>
+        </div>
+        <div class="col-12 col-sm-6 col-xl-3">
+            <article class="metric-card metric-warning">
+                <div class="metric-top">
+                    <span class="metric-label">Pending</span>
+                    <span class="metric-icon"><i class="bi bi-hourglass-split" aria-hidden="true"></i></span>
+                </div>
+                <div class="metric-value">{{ pendingSellers() }}</div>
+            </article>
+        </div>
+        <div class="col-12 col-sm-6 col-xl-3">
+            <article class="metric-card metric-danger">
+                <div class="metric-top">
+                    <span class="metric-label">Suspended</span>
+                    <span class="metric-icon"><i class="bi bi-slash-circle" aria-hidden="true"></i></span>
+                </div>
+                <div class="metric-value">{{ suspendedSellers() }}</div>
+            </article>
+        </div>
+    </section>
+
+    <!-- SELLER LIST TABLE -->
+    <section class="panel mt-3">
+        <div class="panel-header">
+            <h2 class="h5 mb-1 section-title"><i class="bi bi-table" aria-hidden="true"></i> Seller List</h2>
+            <div class="d-flex gap-2 flex-wrap filters-row">
+                <select class="form-select form-select-md status-filter" aria-label="Filter by status"
+                    [ngModel]="statusFilter()" (ngModelChange)="statusFilter.set($event)">
+                    <option value="">All Status</option>
+                    @for (status of statusOptions; track status) {
+                        <option [value]="status">{{ status }}</option>
+                    }
+                </select>
+                <input class="form-control form-control-md table-search" type="search" placeholder="Search sellers..."
+                    aria-label="Search sellers" [ngModel]="searchTerm()" (ngModelChange)="searchTerm.set($event)">
+            </div>
+        </div>
+        @if (selectedIds().size > 0) {
+            <div class="bulk-action-bar">
+                <span class="fw-semibold">{{ selectedIds().size }} selected</span>
+                <button type="button" class="btn btn-success btn-sm" (click)="bulkApprove()">Approve Selected</button>
+                <button type="button" class="btn btn-outline-secondary btn-sm" (click)="bulkExportCsv()">Export CSV</button>
+                <button type="button" class="btn btn-outline-danger btn-sm" (click)="bulkDelete()">Delete Selected</button>
+                <button type="button" class="btn btn-link btn-sm" (click)="clearSelection()">Clear</button>
+            </div>
+        }
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th scope="col" style="width: 2.5rem;">
+                            <input class="form-check-input" type="checkbox" aria-label="Select all sellers"
+                                [checked]="pg.pagedData.length > 0 && pg.pagedData.every(s => isSelected(s.id))"
+                                (change)="toggleSelectAll(pg.pagedData)">
+                        </th>
+                        <th scope="col">Seller</th>
+                        <th scope="col">Contact</th>
+                        <th scope="col">Commission</th>
+                        <th scope="col">Products</th>
+                        <th scope="col">Orders</th>
+                        <th scope="col">Score</th>
+                        <th scope="col">Status</th>
+                        <th scope="col" class="text-end">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (seller of pg.pagedData; track seller.id) {
+                        <tr>
+                            <td>
+                                <input class="form-check-input" type="checkbox" [attr.aria-label]="'Select ' + seller.businessName"
+                                    [checked]="isSelected(seller.id)" (change)="toggleSelect(seller.id)">
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="td-avatar">{{ seller.businessName.charAt(0) }}</span>
+                                    <div>
+                                        <p class="fw-semibold mb-0">{{ seller.businessName }}</p>
+                                        <p class="text-muted small mb-0">{{ seller.ownerName }}</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <p class="mb-0">{{ seller.email }}</p>
+                                <p class="text-muted small mb-0">{{ seller.phone }}</p>
+                            </td>
+                            <td>{{ seller.commissionRate }}%</td>
+                            <td>{{ seller.totalProducts }}</td>
+                            <td>{{ seller.totalOrders }}</td>
+                            <td>
+                                @if (scoreFor(seller) > 0) {
+                                    <span class="badge"
+                                        [ngClass]="{'text-bg-success': scoreLabel(scoreFor(seller)) === 'Excellent' || scoreLabel(scoreFor(seller)) === 'Good', 'text-bg-warning': scoreLabel(scoreFor(seller)) === 'Average', 'text-bg-danger': scoreLabel(scoreFor(seller)) === 'Poor'}">
+                                        {{ scoreFor(seller) }} · {{ scoreLabel(scoreFor(seller)) }}
+                                    </span>
+                                } @else {
+                                    <span class="text-muted small">N/A</span>
+                                }
+                            </td>
+                            <td>
+                                <span class="badge"
+                                    [ngClass]="{'text-bg-success': seller.status === 'Approved', 'text-bg-warning': seller.status === 'Pending', 'text-bg-danger': seller.status === 'Suspended' || seller.status === 'Rejected'}">
+                                    {{ seller.status }}
+                                </span>
+                            </td>
+                            <td class="text-end">
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-info dropdown-toggle btn-sm"
+                                        data-bs-toggle="dropdown" aria-expanded="false">Action</button>
+                                    <ul class="dropdown-menu dropdown-menu-end">
+                                        @if (seller.status === 'Pending') {
+                                            <li><a class="dropdown-item text-success" href="javascript:void(0)" (click)="updateStatus(seller.id, 'Approved')">Approve</a></li>
+                                            <li><a class="dropdown-item text-danger" href="javascript:void(0)" (click)="updateStatus(seller.id, 'Rejected')">Reject</a></li>
+                                        }
+                                        @if (seller.status === 'Approved') {
+                                            <li><a class="dropdown-item text-danger" href="javascript:void(0)" (click)="updateStatus(seller.id, 'Suspended')">Suspend</a></li>
+                                        }
+                                        @if (seller.status === 'Suspended') {
+                                            <li><a class="dropdown-item text-success" href="javascript:void(0)" (click)="updateStatus(seller.id, 'Approved')">Reactivate</a></li>
+                                        }
+                                        <li><a class="dropdown-item" href="javascript:void(0)" data-bs-toggle="modal"
+                                                data-bs-target="#sellerModal" (click)="openEdit(seller)">Edit</a></li>
+                                        <li><a class="dropdown-item text-danger" href="javascript:void(0)" (click)="deleteSeller(seller.id)">Delete</a></li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                    } @empty {
+                        <tr>
+                            <td colspan="9" class="text-center text-muted py-5">
+                                <i class="bi bi-inbox fs-3 d-block mb-2" aria-hidden="true"></i>
+                                No sellers found.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <div class="px-3 pb-3">
+            <mks-pagination #pg="mksPagination" [data]="filteredSellers()" [pageSize]="10"
+                [pageSizeOptions]="[10, 25, 50]" color="#6366f1" [showInfo]="true" [showPageSize]="true">
+            </mks-pagination>
+        </div>
+    </section>
+
+    <!-- ADD/EDIT SELLER MODAL -->
+    <div class="modal fade" id="sellerModal" aria-hidden="true" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <form [formGroup]="form" (ngSubmit)="save()">
+                    <div class="modal-header">
+                        <h5 class="modal-title">{{ editingId() ? 'Edit Seller' : 'Add New Seller' }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Business Name</label>
+                                <input type="text" class="form-control" formControlName="businessName" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Owner Name</label>
+                                <input type="text" class="form-control" formControlName="ownerName" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Email</label>
+                                <input type="email" class="form-control" formControlName="email" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Phone</label>
+                                <input type="tel" class="form-control" formControlName="phone" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">GST Number</label>
+                                <input type="text" class="form-control" formControlName="gstNumber">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Commission (%)</label>
+                                <input type="number" class="form-control" formControlName="commissionRate" min="0">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Status</label>
+                                <select class="form-select" formControlName="status">
+                                    @for (status of statusOptions; track status) {
+                                        <option [value]="status">{{ status }}</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary" data-bs-dismiss="modal">Save Seller</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

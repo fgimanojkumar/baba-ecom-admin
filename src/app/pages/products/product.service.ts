@@ -11,6 +11,7 @@ export class ProductService {
     "id": "PRD001",
     "sku": "AMC-FW-001",
     "barcode": "8901234567890",
+    "hsnCode": "3401",
     "name": "Multani Mitti Face Wash",
     "slug": "multani-mitti-face-wash",
     "shortDescription": "Natural multani mitti face wash for oily and acne-prone skin.",
@@ -46,7 +47,16 @@ export class ProductService {
     "updatedAt": "2026-07-05T10:00:00Z"
   };
 
-  private readonly _products = new BehaviorSubject<Product[]>([new Product(this.initialProductData)]);
+  // Extra dummy products used to demonstrate low-stock alerts on the dashboard
+  private readonly lowStockProductData = [
+    { ...this.initialProductData, id: 'PRD002', sku: 'SPX-200', name: 'Smartphone X200', slug: 'smartphone-x200', category: { id: 'CAT001', name: 'Electronics' }, inventory: { trackInventory: true, stock: 8, minStock: 15, maxOrderQuantity: 5, allowBackorder: false } },
+    { ...this.initialProductData, id: 'PRD003', sku: 'CCT-101', name: 'Cotton Casual T-Shirt', slug: 'cotton-casual-tshirt', category: { id: 'CAT002', name: 'Apparel' }, inventory: { trackInventory: true, stock: 3, minStock: 10, maxOrderQuantity: 10, allowBackorder: false } },
+  ];
+
+  private readonly _products = new BehaviorSubject<Product[]>([
+    new Product(this.initialProductData),
+    ...this.lowStockProductData.map((data) => new Product(data)),
+  ]);
   readonly products$ = this._products.asObservable();
 
   getProducts(): Product[] {

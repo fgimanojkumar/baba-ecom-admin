@@ -4,371 +4,277 @@
         <div class="page-heading-copy">
             <span class="page-icon"><i class="bi bi-arrow-return-left" aria-hidden="true"></i></span>
             <div>
-                <h1 class="h5 mb-1">Product Returns</h1>
+                <h1 class="h5 mb-1 d-flex align-items-center gap-2">Product Returns <app-page-info heading="Product Returns" text="Review and process customer return requests through approval, transit, and completion, including refunds."></app-page-info></h1>
                 <p class="text-muted mb-0">Manage and process customer return requests.</p>
             </div>
         </div>
     </div>
 
-
-    <div class="row">
+    <div class="row g-3">
         <div class="col-md-6">
             <mks-calendar mode="single" color="#6366f1" dateFormat="DD MMM YYYY" placeholder="Start date"
-                [showToday]="true" [firstDayOfWeek]="1" [inline]="false">
+                [showToday]="true" [firstDayOfWeek]="1" [inline]="false" (onChange)="onStartDateChange($event)">
             </mks-calendar>
         </div>
         <div class="col-md-6">
             <mks-calendar mode="single" color="#6366f1" dateFormat="DD MMM YYYY" placeholder="End date"
-                [showToday]="true" [firstDayOfWeek]="1" [inline]="false">
+                [showToday]="true" [firstDayOfWeek]="1" [inline]="false" (onChange)="onEndDateChange($event)">
             </mks-calendar>
         </div>
     </div>
 
-
-
     <section>
-        <!-- <ul class="nav nav-pills nav-fill mt-3" id="returnsTab" role="tablist"> -->
-        <ul class="nav nav-tabs" role="tablist">
-            <li class="nav-item p-1" role="presentation">
-                <button class="nav-link active w-100" data-bs-toggle="tab" data-bs-target="#pending-pane" type="button"
-                    role="tab">Pending <span class="badge text-bg-secondary">2</span></button>
-            </li>
-            <li class="nav-item p-1" role="presentation">
-                <button class="nav-link w-100" data-bs-toggle="tab" data-bs-target="#approved-pane" type="button"
-                    role="tab">Approved</button>
-            </li>
-            <li class="nav-item p-1" role="presentation">
-                <button class="nav-link w-100" data-bs-toggle="tab" data-bs-target="#transit-pane" type="button"
-                    role="tab">In Transit</button>
-            </li>
-            <li class="nav-item p-1" role="presentation">
-                <button class="nav-link w-100" data-bs-toggle="tab" data-bs-target="#completed-pane" type="button"
-                    role="tab">Completed</button>
-            </li>
-            <li class="nav-item p-1" role="presentation">
-                <button class="nav-link w-100" data-bs-toggle="tab" data-bs-target="#rejected-pane" type="button"
-                    role="tab">Rejected</button>
-            </li>
-        </ul>
-
-        <!-- TABS CONTENT -->
-        <div class="tab-content mt-3" id="returnsTabContent">
-            <!-- PENDING PANE -->
-            <div class="tab-pane fade show active" id="pending-pane" role="tabpanel" aria-labelledby="pending-tab"
-                tabindex="0">
-                <section class="panel">
-                    <div class="panel-header">
-                        <h2 class="h5 mb-1 section-title">Pending Requests</h2>
-                    </div>
-                    <div class="table-responsive">
-                        <table class="table align-middle mb-0">
-                            <thead>
-                                <tr>
-                                    <th>Return ID</th>
-                                    <th>Order ID</th>
-                                    <th>Customer</th>
-                                    <th>Product</th>
-                                    <th>Reason</th>
-                                    <th>Date Submitted</th>
-                                    <th class="text-end">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <!-- Dummy Pending Return -->
-                                <tr>
-                                    <td>#RTN-005</td>
-                                    <td>#ORD-001250</td>
-                                    <td>Ravi Verma</td>
-                                    <td>Cotton T-Shirt</td>
-                                    <td>Wrong size</td>
-                                    <td>July 16, 2026</td>
-                                    <td class="text-end">
-                                        <button class="btn btn-sm btn-primary" data-bs-toggle="modal"
-                                            data-bs-target="#returnDetailsModal">View Details</button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </section>
-            </div>
-            <!-- Other panes (Approved, Rejected) would have similar table structures -->
-            <div class="tab-pane fade" id="approved-pane" role="tabpanel" aria-labelledby="approved-tab" tabindex="0">
-                <section class="panel">
-                    <div class="panel-header">
-                        <h2 class="h5 mb-1 section-title">Approved Requests</h2>
-                    </div>
-                    <div class="table-responsive">
-                        <table class="table align-middle mb-0">
-                            <thead>
-                                <tr>
-                                    <th>Return ID</th>
-                                    <th>Order ID</th>
-                                    <th>Customer</th>
-                                    <th>Product</th>
-                                    <th>Status</th>
-                                    <th class="text-end">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <!-- Dummy Approved Return -->
-                                <tr>
-                                    <td>#RTN-004</td>
-                                    <td>#ORD-001249</td>
-                                    <td>Sunita Devi</td>
-                                    <td>Leather Handbag</td>
-                                    <td><span class="badge text-bg-info">Pickup Scheduled</span></td>
-                                    <td class="text-end">
-                                        <button class="btn btn-sm btn-primary" data-bs-toggle="modal"
-                                            data-bs-target="#refundModal">Initiate Refund</button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </section>
-            </div>
-            <div class="tab-pane fade" id="transit-pane" role="tabpanel" aria-labelledby="transit-tab" tabindex="0">
-                <section class="panel">
-                    <div class="panel-header">
-                        <h2 class="h5 mb-1 section-title">Returns In Transit</h2>
-                    </div>
-                    <div class="table-responsive">
-                        <table class="table align-middle mb-0">
-                            <thead>
-                                <tr>
-                                    <th>Return ID</th>
-                                    <th>Order ID</th>
-                                    <th>Customer</th>
-                                    <th>Tracking ID</th>
-                                    <th class="text-end">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <!-- Dummy In Transit Return -->
-                                <tr>
-                                    <td>#RTN-003</td>
-                                    <td>#ORD-001248</td>
-                                    <td>Amit Singh</td>
-                                    <td>AWB123456789</td>
-                                    <td class="text-end">
-                                        <button class="btn btn-sm btn-outline-secondary">Track Shipment</button>
-                                        <button class="btn btn-sm btn-success ms-2">Mark as Received</button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </section>
-            </div>
-            <div class="tab-pane fade" id="completed-pane" role="tabpanel" aria-labelledby="completed-tab" tabindex="0">
-                <section class="panel">
-                    <div class="panel-header">
-                        <h2 class="h5 mb-1 section-title">Completed Returns</h2>
-                    </div>
-                    <div class="table-responsive">
-                        <table class="table align-middle mb-0">
-                            <thead>
-                                <tr>
-                                    <th>Return ID</th>
-                                    <th>Order ID</th>
-                                    <th>Customer</th>
-                                    <th>Product</th>
-                                    <th>Refund Status</th>
-                                    <th class="text-end">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <!-- Dummy Completed Return -->
-                                <tr>
-                                    <td>#RTN-002</td>
-                                    <td>#ORD-001247</td>
-                                    <td>Manoj Kumar</td>
-                                    <td>Wireless Earbuds</td>
-                                    <td><span class="badge text-bg-success">Refunded</span></td>
-                                    <td class="text-end">
-                                        <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal"
-                                            data-bs-target="#returnDetailsModal">View Details</button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </section>
-            </div>
-            <div class="tab-pane fade" id="rejected-pane" role="tabpanel" aria-labelledby="rejected-tab" tabindex="0">
-                <section class="panel">
-                    <div class="panel-header">
-                        <h2 class="h5 mb-1 section-title">Rejected Requests</h2>
-                    </div>
-                    <div class="table-responsive">
-                        <table class="table align-middle mb-0">
-                            <thead>
-                                <tr>
-                                    <th>Return ID</th>
-                                    <th>Order ID</th>
-                                    <th>Customer</th>
-                                    <th>Reason for Rejection</th>
-                                    <th class="text-end">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>#RTN-001</td>
-                                    <td>#ORD-001246</td>
-                                    <td>Geeta Singh</td>
-                                    <td>Return period expired</td>
-                                    <td class="text-end">
-                                        <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal"
-                                            data-bs-target="#returnDetailsModal">View Details</button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </section>
-            </div>
+        <div class="status-tabs mt-3" role="tablist">
+            <button type="button" class="status-tab" [class.active]="activeStatus() === 'pending'"
+                (click)="setStatus('pending')">
+                <span class="status-tab-icon"><i class="bi bi-hourglass-split" aria-hidden="true"></i></span>
+                <span class="status-tab-label">Pending</span>
+                <span class="status-tab-count">{{ counts().pending }}</span>
+            </button>
+            <button type="button" class="status-tab" [class.active]="activeStatus() === 'approved'"
+                (click)="setStatus('approved')">
+                <span class="status-tab-icon"><i class="bi bi-check2-circle" aria-hidden="true"></i></span>
+                <span class="status-tab-label">Approved</span>
+                <span class="status-tab-count">{{ counts().approved }}</span>
+            </button>
+            <button type="button" class="status-tab" [class.active]="activeStatus() === 'in-transit'"
+                (click)="setStatus('in-transit')">
+                <span class="status-tab-icon"><i class="bi bi-truck" aria-hidden="true"></i></span>
+                <span class="status-tab-label">In Transit</span>
+                <span class="status-tab-count">{{ counts().inTransit }}</span>
+            </button>
+            <button type="button" class="status-tab" [class.active]="activeStatus() === 'completed'"
+                (click)="setStatus('completed')">
+                <span class="status-tab-icon"><i class="bi bi-bag-check" aria-hidden="true"></i></span>
+                <span class="status-tab-label">Completed</span>
+                <span class="status-tab-count">{{ counts().completed }}</span>
+            </button>
+            <button type="button" class="status-tab" [class.active]="activeStatus() === 'rejected'"
+                (click)="setStatus('rejected')">
+                <span class="status-tab-icon"><i class="bi bi-x-circle" aria-hidden="true"></i></span>
+                <span class="status-tab-label">Rejected</span>
+                <span class="status-tab-count">{{ counts().rejected }}</span>
+            </button>
         </div>
+
+        <section class="panel mt-3">
+            <div class="panel-header">
+                <h2 class="h5 mb-1 section-title">
+                    @switch (activeStatus()) {
+                        @case ('pending') { Pending Requests }
+                        @case ('approved') { Approved Requests }
+                        @case ('in-transit') { Returns In Transit }
+                        @case ('completed') { Completed Returns }
+                        @case ('rejected') { Rejected Requests }
+                    }
+                </h2>
+                <input class="form-control form-control-md table-search" type="search"
+                    placeholder="Search return, order or customer..." aria-label="Search returns"
+                    [ngModel]="searchTerm()" (ngModelChange)="searchTerm.set($event)">
+            </div>
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Return ID</th>
+                            <th>Order ID</th>
+                            <th>Customer</th>
+                            <th>Product</th>
+                            @switch (activeStatus()) {
+                                @case ('pending') { <th>Reason</th><th>Date Submitted</th> }
+                                @case ('in-transit') { <th>Tracking ID</th> }
+                                @case ('completed') { <th>Refund Status</th> }
+                                @case ('rejected') { <th>Reason for Rejection</th> }
+                            }
+                            <th class="text-end">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (request of filteredReturns(); track request.id) {
+                            <tr>
+                                <td>#{{ request.id }}</td>
+                                <td>#{{ request.orderId }}</td>
+                                <td>{{ request.customerName }}</td>
+                                <td>{{ request.product }}</td>
+                                @switch (activeStatus()) {
+                                    @case ('pending') {
+                                        <td>{{ request.reason }}</td>
+                                        <td>{{ request.dateSubmitted }}</td>
+                                        <td class="text-end">
+                                            <button class="btn btn-sm btn-success" (click)="approve(request)">Approve</button>
+                                            <button class="btn btn-sm btn-danger ms-1" (click)="reject(request)">Reject</button>
+                                            <button class="btn btn-sm btn-outline-secondary ms-1" data-bs-toggle="modal"
+                                                data-bs-target="#returnDetailsModal" (click)="viewReturn(request)">View</button>
+                                        </td>
+                                    }
+                                    @case ('approved') {
+                                        <td class="text-end">
+                                            <button class="btn btn-sm btn-primary" (click)="markInTransit(request)">Mark In Transit</button>
+                                            <button class="btn btn-sm btn-outline-secondary ms-1" data-bs-toggle="modal"
+                                                data-bs-target="#returnDetailsModal" (click)="viewReturn(request)">View</button>
+                                        </td>
+                                    }
+                                    @case ('in-transit') {
+                                        <td>{{ request.trackingId }}</td>
+                                        <td class="text-end">
+                                            <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal"
+                                                data-bs-target="#returnDetailsModal" (click)="viewReturn(request)">Track Shipment</button>
+                                            <button class="btn btn-sm btn-success ms-1" (click)="markReceived(request)">Mark as Received</button>
+                                        </td>
+                                    }
+                                    @case ('completed') {
+                                        <td><span class="badge text-bg-success">Refunded</span></td>
+                                        <td class="text-end">
+                                            <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal"
+                                                data-bs-target="#returnDetailsModal" (click)="viewReturn(request)">View Details</button>
+                                        </td>
+                                    }
+                                    @case ('rejected') {
+                                        <td>{{ request.rejectionReason }}</td>
+                                        <td class="text-end">
+                                            <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal"
+                                                data-bs-target="#returnDetailsModal" (click)="viewReturn(request)">View Details</button>
+                                        </td>
+                                    }
+                                }
+                            </tr>
+                        } @empty {
+                            <tr>
+                                <td colspan="6" class="text-center text-muted py-5">
+                                    <i class="bi bi-inbox fs-3 d-block mb-2" aria-hidden="true"></i>
+                                    No return requests found.
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </section>
     </section>
 
     <!-- RETURN DETAILS MODAL -->
     <div class="modal fade" id="returnDetailsModal" aria-hidden="true" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered modal-xl">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Return Request: #RTN-005</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="row g-4">
-                        <!-- Left Column: Details -->
-                        <div class="col-md-7">
-                            <h6>Order & Product</h6>
-                            <div class="d-flex align-items-center mb-3">
-                                <img src="assets/images/ecommerce/product-1.jpg" alt="Product Image" class="me-3"
-                                    style="width: 80px; height: 80px; object-fit: cover; border-radius: 0.375rem;">
-                                <div>
-                                    <p class="mb-0"><strong>Product:</strong> Cotton T-Shirt - Blue, Size M</p>
-                                    <p class="mb-0"><strong>SKU:</strong> CT-BL-M-01</p>
-                                    <p class="mb-0"><strong>Order ID:</strong> <a href="#">#ORD-001250</a></p>
+            @if (selectedReturn(); as request) {
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Return Request: #{{ request.id }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row g-4">
+                            <!-- Left Column: Details -->
+                            <div class="col-md-7">
+                                <h6>Order & Product</h6>
+                                <div class="d-flex align-items-center gap-3 mb-3">
+                                    <span class="td-avatar"><i class="bi bi-box-seam" aria-hidden="true"></i></span>
+                                    <div>
+                                        <p class="mb-0"><strong>Product:</strong> {{ request.product }}</p>
+                                        <p class="mb-0"><strong>SKU:</strong> {{ request.sku }}</p>
+                                        <p class="mb-0"><strong>Order ID:</strong> #{{ request.orderId }}</p>
+                                    </div>
                                 </div>
+
+                                <hr>
+
+                                <h6>Return Details</h6>
+                                <div class="p-3 bg-light rounded">
+                                    <p class="mb-0"><strong>Reason:</strong> {{ request.reason }}</p>
+                                </div>
+
+                                @if (request.status === 'rejected') {
+                                    <div class="alert alert-danger mt-3 mb-0">
+                                        <strong>Rejection reason:</strong> {{ request.rejectionReason }}
+                                    </div>
+                                }
+
+                                <hr>
+
+                                <h6>Customer</h6>
+                                <p class="mb-0">
+                                    <strong>Name:</strong> {{ request.customerName }}<br>
+                                    <strong>Email:</strong> {{ request.customerEmail }}<br>
+                                    <strong>Refund Amount:</strong> {{ request.refundAmount | currency:'INR':'symbol':'1.2-2' }}
+                                </p>
                             </div>
 
-                            <hr>
-
-                            <h6>Return Details</h6>
-                            <div class="p-3 bg-light rounded">
-                                <p><strong>Reason:</strong> Wrong size received.</p>
-                                <p class="mb-0"><strong>Customer Comments:</strong> "I ordered a Medium size but
-                                    received
-                                    a Large. Please process the return."</p>
+                            <!-- Right Column: Timeline -->
+                            <div class="col-md-5">
+                                <h6>Return Timeline</h6>
+                                <ul class="list-unstyled mb-0">
+                                    <li class="d-flex gap-3">
+                                        <div class="d-flex flex-column align-items-center">
+                                            <i class="bi bi-check-circle-fill text-success"></i>
+                                            <div class="flex-grow-1 border-start" style="min-height: 40px;"></div>
+                                        </div>
+                                        <div>
+                                            <p class="fw-semibold mb-0">Request Submitted</p>
+                                            <p class="text-muted small">{{ request.dateSubmitted }}</p>
+                                        </div>
+                                    </li>
+                                    <li class="d-flex gap-3">
+                                        <div class="d-flex flex-column align-items-center">
+                                            <i class="bi" [ngClass]="request.status === 'rejected' ? 'bi-x-circle-fill text-danger' : (request.status !== 'pending' ? 'bi-check-circle-fill text-success' : 'bi-circle text-muted')"></i>
+                                            <div class="flex-grow-1 border-start" style="min-height: 40px;"></div>
+                                        </div>
+                                        <div>
+                                            <p class="fw-semibold mb-0" [class.text-muted]="request.status === 'pending'">
+                                                {{ request.status === 'rejected' ? 'Request Rejected' : 'Request Approved' }}
+                                            </p>
+                                        </div>
+                                    </li>
+                                    <li class="d-flex gap-3">
+                                        <div class="d-flex flex-column align-items-center">
+                                            <i class="bi" [ngClass]="['in-transit','completed'].includes(request.status) ? 'bi-check-circle-fill text-success' : 'bi-circle text-muted'"></i>
+                                            <div class="flex-grow-1 border-start" style="min-height: 40px;"></div>
+                                        </div>
+                                        <div>
+                                            <p class="fw-semibold mb-0" [class.text-muted]="!['in-transit','completed'].includes(request.status)">
+                                                Picked Up @if (request.trackingId) { <span class="text-muted small">({{ request.trackingId }})</span> }
+                                            </p>
+                                        </div>
+                                    </li>
+                                    <li class="d-flex gap-3">
+                                        <div class="d-flex flex-column align-items-center">
+                                            <i class="bi" [ngClass]="request.status === 'completed' ? 'bi-check-circle-fill text-success' : 'bi-circle text-muted'"></i>
+                                        </div>
+                                        <div>
+                                            <p class="fw-semibold mb-0" [class.text-muted]="request.status !== 'completed'">Refunded</p>
+                                        </div>
+                                    </li>
+                                </ul>
                             </div>
-
-                            <h6 class="mt-3">Customer Uploaded Images</h6>
-                            <div class="d-flex gap-2">
-                                <a href="assets/images/ecommerce/product-1.jpg" target="_blank">
-                                    <img src="assets/images/ecommerce/product-1.jpg" alt="Customer Image 1"
-                                        style="width: 70px; height: 70px; object-fit: cover; border-radius: 0.375rem;">
-                                </a>
-                                <a href="assets/images/ecommerce/product-1.jpg" target="_blank">
-                                    <img src="assets/images/ecommerce/product-1.jpg" alt="Customer Image 2"
-                                        style="width: 70px; height: 70px; object-fit: cover; border-radius: 0.375rem;">
-                                </a>
-                            </div>
-
-                            <hr>
-
-                            <h6>Customer & Pickup Address</h6>
-                            <p>
-                                <strong>Name:</strong> Ravi Verma<br>
-                                <strong>Email:</strong> ravi@example.com<br>
-                                <strong>Address:</strong> 789, PQR Colony, Mumbai, Maharashtra, 400001, India
-                            </p>
                         </div>
-
-                        <!-- Right Column: Timeline -->
-                        <div class="col-md-5">
-                            <h6>Return Timeline</h6>
-                            <ul class="list-unstyled">
-                                <li class="d-flex gap-3">
-                                    <div class="d-flex flex-column align-items-center">
-                                        <i class="bi bi-check-circle-fill text-success"></i>
-                                        <div class="flex-grow-1 border-start" style="min-height: 50px;"></div>
-                                    </div>
-                                    <div>
-                                        <p class="fw-semibold mb-0">Request Submitted</p>
-                                        <p class="text-muted small">July 16, 2026, 10:30 AM</p>
-                                    </div>
-                                </li>
-                                <li class="d-flex gap-3">
-                                    <div class="d-flex flex-column align-items-center">
-                                        <i class="bi bi-circle text-muted"></i>
-                                    </div>
-                                    <div>
-                                        <p class="fw-semibold mb-0 text-muted">Request Approved</p>
-                                    </div>
-                                </li>
-                            </ul>
+                    </div>
+                    <div class="modal-footer justify-content-between">
+                        <div>
+                            @if (request.status === 'pending') {
+                                <button type="button" class="btn btn-danger" data-bs-dismiss="modal" (click)="reject(request)">
+                                    <i class="bi bi-x-circle"></i> Reject Request
+                                </button>
+                            }
+                        </div>
+                        <div>
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                            @if (request.status === 'pending') {
+                                <button type="button" class="btn btn-success" data-bs-dismiss="modal" (click)="approve(request)">
+                                    <i class="bi bi-check-circle"></i> Approve Request
+                                </button>
+                            }
+                            @if (request.status === 'approved') {
+                                <button type="button" class="btn btn-primary" data-bs-dismiss="modal" (click)="markInTransit(request)">
+                                    <i class="bi bi-truck"></i> Mark In Transit
+                                </button>
+                            }
+                            @if (request.status === 'in-transit') {
+                                <button type="button" class="btn btn-primary" data-bs-dismiss="modal" (click)="markReceived(request)">
+                                    <i class="bi bi-currency-rupee"></i> Mark Received & Refund
+                                </button>
+                            }
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer justify-content-between">
-                    <div>
-                        <button type="button" class="btn btn-danger"><i class="bi bi-x-circle"></i> Reject
-                            Request</button>
-                    </div>
-                    <div>
-                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-success"><i class="bi bi-check-circle"></i> Approve
-                            Request</button>
-                        <button type="button" class="btn btn-primary" data-bs-toggle="modal"
-                            data-bs-target="#refundModal"><i class="bi bi-currency-rupee"></i> Initiate Refund</button>
-                    </div>
-                </div>
-            </div>
+            }
         </div>
     </div>
-
-    <!-- REFUND MODAL -->
-    <div class="modal fade" id="refundModal" aria-hidden="true" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Initiate Refund for #RTN-005</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label">Refund Amount</label>
-                        <div class="input-group">
-                            <span class="input-group-text">₹</span>
-                            <input type="number" class="form-control" value="499.00">
-                        </div>
-                        <div class="form-text">Order total was ₹499.00. Adjust if necessary (e.g., for partial
-                            refunds).</div>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Refund Method</label>
-                        <select class="form-select">
-                            <option selected>Original Payment Method</option>
-                            <option>Store Wallet / Credit</option>
-                            <option>Bank Transfer</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Transaction ID / Notes (Optional)</label>
-                        <input type="text" class="form-control" placeholder="e.g., UPI Ref No.">
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary">Confirm Refund</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-
-
-
 </div>

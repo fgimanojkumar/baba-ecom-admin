@@ -1,0 +1,118 @@
+<div class="container-fluid px-3 px-lg-4 py-4">
+    <!-- PAGE HEADING -->
+    <div class="page-heading">
+        <div class="page-heading-copy">
+            <span class="page-icon"><i class="bi bi-shield-lock" aria-hidden="true"></i></span>
+            <div>
+                <h1 class="h5 mb-1 d-flex align-items-center gap-2">Roles & Permissions <app-page-info heading="Roles & Permissions" text="Create custom staff roles with granular access to specific modules of the admin panel."></app-page-info></h1>
+                <p class="text-muted mb-0">Create custom staff roles with granular module access.</p>
+            </div>
+        </div>
+        <div class="heading-actions">
+            <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#roleModal" (click)="openAdd()">
+                <i class="bi bi-plus-circle" aria-hidden="true"></i>
+                Add Role
+            </button>
+        </div>
+    </div>
+
+    <!-- ROLE LIST TABLE -->
+    <section class="panel mt-3">
+        <div class="panel-header">
+            <h2 class="h5 mb-1 section-title"><i class="bi bi-table" aria-hidden="true"></i> Role List</h2>
+            <input class="form-control form-control-md table-search" type="search" placeholder="Search roles..."
+                aria-label="Search roles" [ngModel]="searchTerm()" (ngModelChange)="searchTerm.set($event)">
+        </div>
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th scope="col">Role</th>
+                        <th scope="col">Permissions</th>
+                        <th scope="col">Users</th>
+                        <th scope="col" class="text-end">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (role of filteredRoles(); track role.id) {
+                        <tr>
+                            <td>
+                                <p class="fw-semibold mb-0">{{ role.name }}</p>
+                                <p class="text-muted small mb-0">{{ role.description }}</p>
+                            </td>
+                            <td>
+                                <div class="d-flex flex-wrap gap-1" style="max-width: 420px;">
+                                    @for (permission of role.permissions.slice(0, 5); track permission) {
+                                        <span class="badge text-bg-light border">{{ permission }}</span>
+                                    }
+                                    @if (role.permissions.length > 5) {
+                                        <span class="badge text-bg-secondary">+{{ role.permissions.length - 5 }} more</span>
+                                    }
+                                </div>
+                            </td>
+                            <td>{{ role.usersCount }}</td>
+                            <td class="text-end">
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-info dropdown-toggle btn-sm"
+                                        data-bs-toggle="dropdown" aria-expanded="false">Action</button>
+                                    <ul class="dropdown-menu dropdown-menu-end">
+                                        <li><a class="dropdown-item" href="javascript:void(0)" data-bs-toggle="modal"
+                                                data-bs-target="#roleModal" (click)="openEdit(role)">Edit</a></li>
+                                        <li><a class="dropdown-item text-danger" href="javascript:void(0)" (click)="deleteRole(role.id)">Delete</a></li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                    } @empty {
+                        <tr>
+                            <td colspan="4" class="text-center text-muted py-5">
+                                <i class="bi bi-inbox fs-3 d-block mb-2" aria-hidden="true"></i>
+                                No roles found.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- ADD/EDIT ROLE MODAL -->
+    <div class="modal fade" id="roleModal" aria-hidden="true" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <form [formGroup]="form" (ngSubmit)="save()">
+                    <div class="modal-header">
+                        <h5 class="modal-title">{{ editingId() ? 'Edit Role' : 'Add Role' }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Role Name</label>
+                            <input type="text" class="form-control" formControlName="name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <input type="text" class="form-control" formControlName="description">
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label d-block">Module Permissions</label>
+                            <div class="d-flex flex-wrap gap-3">
+                                @for (permission of availablePermissions; track permission) {
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" [id]="'perm-' + permission"
+                                            [checked]="isPermissionChecked(permission)" (change)="togglePermission(permission, $any($event.target).checked)">
+                                        <label class="form-check-label" [for]="'perm-' + permission">{{ permission }}</label>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary" data-bs-dismiss="modal">Save Role</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

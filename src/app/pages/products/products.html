@@ -4,11 +4,20 @@
         <div class="page-heading-copy">
             <span class="page-icon"><i class="bi bi-box-seam" aria-hidden="true"></i></span>
             <div>
-                <h1 class="h5 mb-1">Products</h1>
+                <h1 class="h5 mb-1 d-flex align-items-center gap-2">Products <app-page-info heading="Products" text="Add, edit, and manage your product catalog — pricing, stock, images, and status — plus bulk CSV import/export."></app-page-info></h1>
                 <p class="text-muted mb-0">Manage your product inventory, including pricing, stock, and more.</p>
             </div>
         </div>
         <div class="heading-actions">
+            <button class="btn btn-outline-secondary btn-sm" (click)="exportProductsCsv()">
+                <i class="bi bi-download" aria-hidden="true"></i>
+                Export CSV
+            </button>
+            <label class="btn btn-outline-secondary btn-sm mb-0">
+                <i class="bi bi-upload" aria-hidden="true"></i>
+                Import CSV
+                <input type="file" accept=".csv" hidden (change)="importProductsCsv($event)">
+            </label>
             <!-- <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#PRODUCTMODEL"
                 (click)="openAddModal()">
                 <i class="bi bi-plus-circle" aria-hidden="true"></i>
@@ -32,19 +41,23 @@
     <!-- manage and view product start here  -->
     @if(isView()){
     <section class="whiteBg mb-4">
+        <div class="d-flex justify-content-end mb-2">
+            <input class="form-control form-control-md table-search" type="search" placeholder="Search products..."
+                aria-label="Search products" [ngModel]="searchTerm()" (ngModelChange)="searchTerm.set($event)">
+        </div>
         <ul class="nav nav-tabs" role="tablist">
 
             <li class="nav-item" role="presentation">
                 <button class="nav-link active" id="active-tab" data-bs-toggle="tab" data-bs-target="#active-tab-pane"
-                    type="button" role="tab" aria-controls="active-tab-pane" aria-selected="false">Active</button>
+                    type="button" role="tab" aria-controls="active-tab-pane" aria-selected="false"><i class="bi bi-check2-circle" aria-hidden="true"></i> Active</button>
             </li>
             <li class="nav-item" role="presentation">
                 <button class="nav-link" id="inactive-tab" data-bs-toggle="tab" data-bs-target="#inactive-tab-pane"
-                    type="button" role="tab" aria-controls="inactive-tab-pane" aria-selected="false">Inactive</button>
+                    type="button" role="tab" aria-controls="inactive-tab-pane" aria-selected="false"><i class="bi bi-slash-circle" aria-hidden="true"></i> Inactive</button>
             </li>
             <li class="nav-item" role="presentation">
                 <button class="nav-link" id="draft-tab" data-bs-toggle="tab" data-bs-target="#draft-tab-pane"
-                    type="button" role="tab" aria-controls="draft-tab-pane" aria-selected="false">Draft</button>
+                    type="button" role="tab" aria-controls="draft-tab-pane" aria-selected="false"><i class="bi bi-file-earmark-text" aria-hidden="true"></i> Draft</button>
             </li>
 
         </ul>
@@ -66,12 +79,12 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @for (product of products(); track product.id()) {
+                            @for (product of activeProducts(); track product.id()) {
                             <tr>
                                 <td>
                                     <div class="d-flex align-items-center gap-2">
                                         <img class="avatar-img avatar-sm"
-                                            [src]="product.images()?.[0]?.url || 'assets/images/avatar/avatar-fallback.jpg'"
+                                            [src]="product.images()[0]?.url || 'assets/images/avatar/avatar-fallback.jpg'"
                                             [alt]="product.name()">
                                         <div>
                                             <p class="fw-semibold mb-0">{{ product.name() }}</p>
@@ -129,12 +142,12 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @for (product of products(); track product.id()) {
+                            @for (product of inactiveProducts(); track product.id()) {
                             <tr>
                                 <td>
                                     <div class="d-flex align-items-center gap-2">
                                         <img class="avatar-img avatar-sm"
-                                            [src]="product.images()?.[0]?.url || 'assets/images/avatar/avatar-fallback.jpg'"
+                                            [src]="product.images()[0]?.url || 'assets/images/avatar/avatar-fallback.jpg'"
                                             [alt]="product.name()">
                                         <div>
                                             <p class="fw-semibold mb-0">{{ product.name() }}</p>
@@ -192,12 +205,12 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @for (product of products(); track product.id()) {
+                            @for (product of draftProducts(); track product.id()) {
                             <tr>
                                 <td>
                                     <div class="d-flex align-items-center gap-2">
                                         <img class="avatar-img avatar-sm"
-                                            [src]="product.images()?.[0]?.url || 'assets/images/avatar/avatar-fallback.jpg'"
+                                            [src]="product.images()[0]?.url || 'assets/images/avatar/avatar-fallback.jpg'"
                                             [alt]="product.name()">
                                         <div>
                                             <p class="fw-semibold mb-0">{{ product.name() }}</p>
@@ -248,42 +261,102 @@
 
 
 
+    @if (isViewProduct()) {
+        @if (selectedProduct(); as product) {
+            <section class="product-view-shell mb-4">
+                <div class="product-view-header d-flex justify-content-between align-items-center flex-wrap gap-3">
+                    <div>
+                        <div class="small text-uppercase text-muted fw-semibold mb-1">Product preview</div>
+                        <h2 class="h4 mb-0">{{ product.name() }}</h2>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-outline-secondary btn-sm" (click)="openEditModal(product)">
+                            <i class="bi bi-pencil-square"></i> Edit
+                        </button>
+                        <button type="button" class="btn btn-light btn-sm" (click)="closeProductView()">
+                            <i class="bi bi-x-lg"></i> Close
+                        </button>
+                    </div>
+                </div>
+
+                <div class="row g-4 mt-1">
+                    <div class="col-lg-4">
+                        <div class="product-view-media">
+                            <img [src]="product.images()[0]?.url || 'assets/images/avatar/avatar-fallback.jpg'" [alt]="product.name()" />
+                        </div>
+                    </div>
+                    <div class="col-lg-8">
+                        <div class="product-view-grid">
+                            <div class="product-view-card">
+                                <span class="product-view-label">SKU</span>
+                                <strong>{{ product.sku() }}</strong>
+                            </div>
+                            <div class="product-view-card">
+                                <span class="product-view-label">Status</span>
+                                <strong>{{ product.status() }}</strong>
+                            </div>
+                            <div class="product-view-card">
+                                <span class="product-view-label">Price</span>
+                                <strong>{{ product.price().sellingPrice | currency:product.price().currency }}</strong>
+                            </div>
+                            <div class="product-view-card">
+                                <span class="product-view-label">Stock</span>
+                                <strong>{{ product.inventory().stock }}</strong>
+                            </div>
+                            <div class="product-view-card full-width">
+                                <span class="product-view-label">Description</span>
+                                <strong>{{ product.description() || 'No description added yet.' }}</strong>
+                            </div>
+                            <div class="product-view-card full-width">
+                                <span class="product-view-label">Category</span>
+                                <strong>{{ product.category().name }}</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        }
+    }
+
     <!-- add new product start here  -->
     @if(isAddNewProduct()){
-    <section class="whiteBg mb-4">
-        <div class="row">
-            <div class="col-8">
-                <form [formGroup]="productForm" (ngSubmit)="saveProduct()">
-                    <!-- <div class="modal-header">
-                        <h5 class="modal-title">{{ isEditMode() ? 'Edit Product' : 'Add New Product' }}</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div> -->
-                    <div class="modal-body">
+    <section class="product-form-shell mb-4">
+        <div class="product-form-head d-flex flex-wrap justify-content-end align-items-center gap-3 mb-3">
+            <div class="d-flex gap-2">
+                <button type="button" class="btn btn-outline-secondary btn-sm" (click)="cancelAllProduct()">
+                    <i class="bi bi-arrow-left"></i> Back to list
+                </button>
+            </div>
+        </div>
+        <div class="product-form-layout">
+            <div class="product-form-main">
+                <form [formGroup]="productForm" (ngSubmit)="saveProduct()" class="product-form-card">
+                    <div class="modal-body product-form-body">
                         <ul class="nav nav-tabs" role="tablist">
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link active" id="general-tab" data-bs-toggle="tab"
                                     data-bs-target="#general-tab-pane" type="button" role="tab"
-                                    aria-controls="general-tab-pane" aria-selected="true">General</button>
+                                    aria-controls="general-tab-pane" aria-selected="true"><i class="bi bi-info-circle" aria-hidden="true"></i> General</button>
                             </li>
                             <li class="nav-item" role="presentation"><button class="nav-link" id="pricing-tab"
                                     data-bs-toggle="tab" data-bs-target="#pricing-tab-pane" type="button" role="tab"
-                                    aria-controls="pricing-tab-pane" aria-selected="false">Pricing</button>
+                                    aria-controls="pricing-tab-pane" aria-selected="false"><i class="bi bi-currency-rupee" aria-hidden="true"></i> Pricing</button>
                             </li>
                             <li class="nav-item" role="presentation"><button class="nav-link" id="inventory-tab"
                                     data-bs-toggle="tab" data-bs-target="#inventory-tab-pane" type="button" role="tab"
-                                    aria-controls="inventory-tab-pane" aria-selected="false">Inventory</button>
+                                    aria-controls="inventory-tab-pane" aria-selected="false"><i class="bi bi-boxes" aria-hidden="true"></i> Inventory</button>
                             </li>
                             <li class="nav-item" role="presentation"><button class="nav-link" id="details-tab"
                                     data-bs-toggle="tab" data-bs-target="#details-tab-pane" type="button" role="tab"
-                                    aria-controls="details-tab-pane" aria-selected="false">Details</button>
+                                    aria-controls="details-tab-pane" aria-selected="false"><i class="bi bi-card-list" aria-hidden="true"></i> Details</button>
                             </li>
                             <li class="nav-item" role="presentation"><button class="nav-link" id="shipping-tab"
                                     data-bs-toggle="tab" data-bs-target="#shipping-tab-pane" type="button" role="tab"
-                                    aria-controls="shipping-tab-pane" aria-selected="false">Shipping</button>
+                                    aria-controls="shipping-tab-pane" aria-selected="false"><i class="bi bi-truck" aria-hidden="true"></i> Shipping</button>
                             </li>
                             <li class="nav-item" role="presentation"><button class="nav-link" id="seo-tab"
                                     data-bs-toggle="tab" data-bs-target="#seo-tab-pane" type="button" role="tab"
-                                    aria-controls="seo-tab-pane" aria-selected="false">SEO & More</button>
+                                    aria-controls="seo-tab-pane" aria-selected="false"><i class="bi bi-search" aria-hidden="true"></i> SEO & More</button>
                             </li>
                         </ul>
 
@@ -294,24 +367,26 @@
                                 <h6 class="mt-3">Basic Information</h6>
                                 <div class="row g-3">
                                     <div class="col-md-8"><label class="form-label">Product Name</label><input
-                                            type="text" class="form-control" formControlName="name"></div>
+                                            type="text" class="form-control" formControlName="name" placeholder="e.g. Wireless Noise Cancelling Headphones"></div>
                                     <div class="col-md-4"><label class="form-label">Slug</label><input type="text"
-                                            class="form-control" formControlName="slug"></div>
+                                            class="form-control" formControlName="slug" placeholder="wireless-headphones"></div>
                                     <div class="col-12"><label class="form-label">Short Description</label><input
-                                            type="text" class="form-control" formControlName="shortDescription"></div>
+                                            type="text" class="form-control" formControlName="shortDescription" placeholder="Brief product summary"></div>
                                     <div class="col-12"><label class="form-label">Full Description</label><textarea
-                                            class="form-control" formControlName="description" rows="4"></textarea>
+                                            class="form-control" formControlName="description" rows="4" placeholder="Describe product quality, features, and key selling points"></textarea>
                                     </div>
                                 </div>
                                 <hr>
                                 <h6 class="mt-3">Identification</h6>
                                 <div class="row g-3">
                                     <div class="col-md-6"><label class="form-label">SKU</label><input type="text"
-                                            class="form-control" formControlName="sku"></div>
+                                            class="form-control" formControlName="sku" placeholder="SKU-1001"></div>
                                     <div class="col-md-6"><label class="form-label">Barcode (EAN, UPC)</label><input
-                                            type="text" class="form-control" formControlName="barcode"></div>
+                                            type="text" class="form-control" formControlName="barcode" placeholder="8901234567890"></div>
+                                    <div class="col-md-6"><label class="form-label">HSN Code</label><input
+                                            type="text" class="form-control" formControlName="hsnCode" placeholder="e.g., 3401"></div>
                                     <div class="col-md-6"><label class="form-label">Manufacturer</label><input
-                                            type="text" class="form-control" formControlName="manufacturer"></div>
+                                            type="text" class="form-control" formControlName="manufacturer" placeholder="Brand or manufacturer name"></div>
                                 </div>
                                 <hr>
                                 <h6 class="mt-3">Categorization</h6>
@@ -332,12 +407,6 @@
                                 <div class="row g-3">
                                     <div class="col-md-4">
                                         <label class="form-label">Status</label>
-                                        <!-- <select class="form-select" formControlName="status">
-                                            <option>DRAFT</option>
-                                            <option>ACTIVE</option>
-                                            <option>INACTIVE</option>
-                                        </select> -->
-
                                         <mks-dropdown label="" [outlined]="true" [required]="false"
                                             placeholder="Select status " [multipleSelect]="false" [maxSelect]="1"
                                             [searchFields]="['tags']" [showSearchFields]="true" grouping="group"
@@ -351,9 +420,7 @@
                                                 }
                                             </select>
                                         </mks-dropdown>
-
                                     </div>
-
                                 </div>
                             </div>
 
@@ -362,21 +429,21 @@
                                 <div formGroupName="price">
                                     <div class="row g-3">
                                         <h6 class="mt-3">Core Pricing</h6>
-                                        <div class="col-md-3">
+                                            <div class="col-md-3">
                                             <label class="form-label">M.R.P.</label>
-                                            <input type="number" class="form-control" formControlName="mrp">
+                                            <input type="number" class="form-control" formControlName="mrp" placeholder="4999">
                                         </div>
                                         <div class="col-md-3">
                                             <label class="form-label">Cost Price</label>
-                                            <input type="number" class="form-control" formControlName="costPrice">
+                                            <input type="number" class="form-control" formControlName="costPrice" placeholder="3200">
                                         </div>
                                         <div class="col-md-3">
                                             <label class="form-label">Selling Price</label>
-                                            <input type="number" class="form-control" formControlName="sellingPrice">
+                                            <input type="number" class="form-control" formControlName="sellingPrice" placeholder="3799">
                                         </div>
                                         <div class="col-md-3">
                                             <label class="form-label">Currency</label>
-                                            <input type="text" class="form-control" formControlName="currency">
+                                            <input type="text" class="form-control" formControlName="currency" placeholder="INR">
                                         </div>
                                     </div>
                                     <hr>
@@ -385,7 +452,7 @@
                                         <div formGroupName="discount" class="row g-3">
                                             <div class="col-md-6">
                                                 <label class="form-label">Discount Value</label>
-                                                <input type="number" class="form-control" formControlName="value">
+                                                <input type="number" class="form-control" formControlName="value" placeholder="10">
                                             </div>
                                             <div class="col-md-6">
                                                 <label class="form-label">Discount Type</label>
@@ -402,7 +469,7 @@
                                         <div formGroupName="tax" class="row g-3">
                                             <div class="col-md-6">
                                                 <label class="form-label">GST (%)</label>
-                                                <input type="number" class="form-control" formControlName="gst">
+                                                <input type="number" class="form-control" formControlName="gst" placeholder="18">
                                             </div>
                                         </div>
                                     </div>
@@ -429,16 +496,10 @@
                                     <div class="row g-3 mt-1">
                                         <div class="col-md-6 d-flex align-items-center pt-3">
                                             <div class="form-check form-switch">
-                                                <!-- <input class="form-check-input" type="checkbox"
-                                                    formControlName="trackInventory"> -->
-
                                                 <mks-toggle [checked]="false" color="#10b981" offColor="#d1d5db"
                                                     size="md" label="" description="" labelPosition="right"
                                                     onLabel="On" offLabel="Off">
                                                 </mks-toggle>
-
-                                                <!-- <label class="form-check-label">Track
-                                                    Inventory</label> -->
                                             </div>
                                         </div>
                                         <div class="col-md-6 d-flex align-items-center pt-3">
@@ -648,7 +709,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="p-2 justify-content-end">
+                    <div class="product-form-actions">
                         <button type="button" class="btn btn-outline-secondary" (click)="cancelAllProduct()" data-bs-dismiss="modal">Cancel</button>
                         @if (isEditMode() && selectedProduct(); as product) {
                         <button type="button" class="btn btn-danger" (click)="deleteProduct(product.id())"
@@ -660,65 +721,63 @@
                     </div>
                 </form>
             </div>
-            <div class="col-4">
-                <div class="card">
 
-                    <div class="card-body">
-                        <h5>Current Images</h5>
-                        <p class="text-muted small">Select a primary image for the product. This will be the first image
-                            customers see.</p>
-
-                        <div class="row mb-4">
-
-                            <div class="col-3 mb-2">
-                                <div class="card position-relative">
-                                    <img src="../../../assets/images/ecommerce/product-1.jpg" class="card-img-top"
-                                        alt="Product Image">
-                                    <div class="position-absolute">
-                                        <input class="form-check-input" type="radio" name="primaryImage"
-                                            id="primaryImage1" checked style="margin: 5px;font-size: 20px;">
-                                    </div>
-                                    <div class="card-footer p-1 text-center">
-                                        <a style="font-size: 10px;" class="btn btn-sm btn-outline-danger">Remove</a>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="col-3 mb-2">
-                                <div class="card position-relative">
-                                    <img src="../../../assets/images/ecommerce/product-1.jpg" class="card-img-top"
-                                        alt="Product Image">
-                                    <div class="position-absolute">
-                                        <input class="form-check-input" type="radio" name="primaryImage"
-                                            id="primaryImage1" checked style="margin: 5px;font-size: 20px;">
-                                    </div>
-                                    <div class="card-footer p-1 text-center">
-                                        <a style="font-size: 10px;" class="btn btn-sm btn-outline-danger">Remove</a>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-3 mb-2">
-                                <div class="card position-relative">
-                                    <img src="../../../assets/images/png/photo copy.png" class="card-img-top"
-                                        alt="Product Image">
-
-                                    <div class="card-footer p-1 text-center">
-                                        <a style="font-size: 10px;" class="btn btn-sm btn-outline-success">Add</a>
-                                    </div>
-                                </div>
-                            </div>
-
-
+            <aside class="product-form-side">
+                <div class="product-side-card">
+                    <div class="product-side-upload">
+                        <div class="upload-icon-wrap">
+                            <i class="bi bi-cloud-arrow-up-fill" aria-hidden="true"></i>
                         </div>
-
-                        <hr>
-
-
+                        <h5>Product media</h5>
+                        <p>Upload clear front-view and lifestyle images. Recommended size is 1200x1200px for the best storefront preview.</p>
+                        <label class="upload-dropzone" for="product-upload-input">
+                            <input id="product-upload-input" type="file" accept="image/*" multiple (change)="onImagesSelected($event)" hidden>
+                            <span class="upload-dropzone-icon"><i class="bi bi-image-fill" aria-hidden="true"></i></span>
+                            <span class="upload-dropzone-text">Upload Images</span>
+                            <small>PNG, JPG, WEBP up to 10 files</small>
+                        </label>
                     </div>
 
+                    <div class="product-side-guide">
+                        <div class="guide-title">Quick guide</div>
+                        <ul>
+                            <li>Use a clean background image as primary image.</li>
+                            <li>Keep product tags and text minimal for better focus.</li>
+                            <li>Upload at least 3 images to improve trust and conversion.</li>
+                        </ul>
+                    </div>
 
+                    <div class="product-side-gallery">
+                        <div class="gallery-header">
+                            <span>Current images</span>
+                            <small>{{ images.length }} files</small>
+                        </div>
+
+                        @if (images.length > 0) {
+                            <div class="gallery-grid">
+                                @for(imageGroup of images.controls; track $index) {
+                                    <div class="gallery-item" [class.is-primary]="imageGroup.get('isPrimary')?.value">
+                                        <img [src]="imageGroup.get('url')?.value || 'assets/images/avatar/avatar-fallback.jpg'" [alt]="'Product image ' + ($index + 1)">
+                                        <div class="gallery-item-actions">
+                                            <button type="button" class="btn btn-sm btn-light" (click)="setPrimaryImage($index)">
+                                                {{ imageGroup.get('isPrimary')?.value ? 'Primary' : 'Set primary' }}
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-outline-danger" (click)="removeImage($index)">
+                                                Remove
+                                            </button>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        } @else {
+                            <div class="empty-gallery">
+                                <i class="bi bi-image" aria-hidden="true"></i>
+                                <p>No images uploaded yet.</p>
+                            </div>
+                        }
+                    </div>
                 </div>
-            </div>
+            </aside>
         </div>
 
     </section>

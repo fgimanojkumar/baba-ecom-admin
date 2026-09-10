@@ -1,0 +1,187 @@
+<div class="container-fluid px-3 px-lg-4 py-4">
+    <!-- PAGE HEADING -->
+    <div class="page-heading">
+        <div class="page-heading-copy">
+            <span class="page-icon"><i class="bi bi-headset" aria-hidden="true"></i></span>
+            <div>
+                <h1 class="h5 mb-1 d-flex align-items-center gap-2">Support Tickets <app-page-info heading="Support Tickets" text="Track and resolve customer and seller support requests by priority, status, and assignment."></app-page-info></h1>
+                <p class="text-muted mb-0">Track and resolve customer and seller support requests.</p>
+            </div>
+        </div>
+        <div class="heading-actions">
+            <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#ticketModal" (click)="openAdd()">
+                <i class="bi bi-plus-circle" aria-hidden="true"></i>
+                New Ticket
+            </button>
+        </div>
+    </div>
+
+    <!-- TICKET SUMMARY -->
+    <section class="row g-3 mt-1" aria-label="Ticket summary">
+        <div class="col-12 col-sm-6 col-xl-4">
+            <article class="metric-card metric-danger">
+                <div class="metric-top">
+                    <span class="metric-label">Open</span>
+                    <span class="metric-icon"><i class="bi bi-envelope-open" aria-hidden="true"></i></span>
+                </div>
+                <div class="metric-value">{{ openCount() }}</div>
+            </article>
+        </div>
+        <div class="col-12 col-sm-6 col-xl-4">
+            <article class="metric-card metric-warning">
+                <div class="metric-top">
+                    <span class="metric-label">In Progress</span>
+                    <span class="metric-icon"><i class="bi bi-arrow-repeat" aria-hidden="true"></i></span>
+                </div>
+                <div class="metric-value">{{ inProgressCount() }}</div>
+            </article>
+        </div>
+        <div class="col-12 col-sm-6 col-xl-4">
+            <article class="metric-card metric-success">
+                <div class="metric-top">
+                    <span class="metric-label">Resolved</span>
+                    <span class="metric-icon"><i class="bi bi-check2-circle" aria-hidden="true"></i></span>
+                </div>
+                <div class="metric-value">{{ resolvedCount() }}</div>
+            </article>
+        </div>
+    </section>
+
+    <!-- TICKET LIST TABLE -->
+    <section class="panel mt-3">
+        <div class="panel-header">
+            <h2 class="h5 mb-1 section-title"><i class="bi bi-table" aria-hidden="true"></i> Ticket List</h2>
+            <div class="d-flex gap-2 flex-wrap filters-row">
+                <select class="form-select form-select-md status-filter" aria-label="Filter by status"
+                    [ngModel]="statusFilter()" (ngModelChange)="statusFilter.set($event)">
+                    <option value="">All Status</option>
+                    @for (status of statusOptions; track status) {
+                        <option [value]="status">{{ status }}</option>
+                    }
+                </select>
+                <input class="form-control form-control-md table-search" type="search" placeholder="Search tickets..."
+                    aria-label="Search tickets" [ngModel]="searchTerm()" (ngModelChange)="searchTerm.set($event)">
+            </div>
+        </div>
+        @if (selectedIds().size > 0) {
+            <div class="bulk-action-bar">
+                <span class="fw-semibold">{{ selectedIds().size }} selected</span>
+                <button type="button" class="btn btn-success btn-sm" (click)="bulkClose()">Mark Closed</button>
+                <button type="button" class="btn btn-outline-danger btn-sm" (click)="bulkDelete()">Delete Selected</button>
+                <button type="button" class="btn btn-link btn-sm" (click)="clearSelection()">Clear</button>
+            </div>
+        }
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th scope="col" style="width: 2.5rem;">
+                            <input class="form-check-input" type="checkbox" aria-label="Select all tickets"
+                                [checked]="filteredTickets().length > 0 && filteredTickets().every(t => isSelected(t.id))"
+                                (change)="toggleSelectAll()">
+                        </th>
+                        <th scope="col">Ticket</th>
+                        <th scope="col">Customer</th>
+                        <th scope="col">Priority</th>
+                        <th scope="col">Assigned To</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Created</th>
+                        <th scope="col" class="text-end">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (ticket of filteredTickets(); track ticket.id) {
+                        <tr>
+                            <td>
+                                <input class="form-check-input" type="checkbox" [attr.aria-label]="'Select ' + ticket.subject"
+                                    [checked]="isSelected(ticket.id)" (change)="toggleSelect(ticket.id)">
+                            </td>
+                            <td class="fw-semibold">{{ ticket.subject }}</td>
+                            <td>{{ ticket.customerName }}</td>
+                            <td>
+                                <span class="badge" [ngClass]="{'text-bg-danger': ticket.priority === 'High', 'text-bg-warning': ticket.priority === 'Medium', 'text-bg-secondary': ticket.priority === 'Low'}">
+                                    {{ ticket.priority }}
+                                </span>
+                            </td>
+                            <td>{{ ticket.assignedTo }}</td>
+                            <td>
+                                <span class="badge" [ngClass]="{'text-bg-danger': ticket.status === 'Open', 'text-bg-warning': ticket.status === 'In Progress', 'text-bg-success': ticket.status === 'Resolved', 'text-bg-secondary': ticket.status === 'Closed'}">
+                                    {{ ticket.status }}
+                                </span>
+                            </td>
+                            <td>{{ ticket.createdDate }}</td>
+                            <td class="text-end">
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-info dropdown-toggle btn-sm"
+                                        data-bs-toggle="dropdown" aria-expanded="false">Action</button>
+                                    <ul class="dropdown-menu dropdown-menu-end">
+                                        <li><a class="dropdown-item" href="javascript:void(0)" data-bs-toggle="modal"
+                                                data-bs-target="#ticketModal" (click)="openEdit(ticket)">Edit</a></li>
+                                        <li><a class="dropdown-item text-danger" href="javascript:void(0)" (click)="deleteTicket(ticket.id)">Delete</a></li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                    } @empty {
+                        <tr>
+                            <td colspan="8" class="text-center text-muted py-5">
+                                <i class="bi bi-inbox fs-3 d-block mb-2" aria-hidden="true"></i>
+                                No tickets found.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- ADD/EDIT TICKET MODAL -->
+    <div class="modal fade" id="ticketModal" aria-hidden="true" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form [formGroup]="form" (ngSubmit)="save()">
+                    <div class="modal-header">
+                        <h5 class="modal-title">{{ editingId() ? 'Edit Ticket' : 'New Ticket' }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Subject</label>
+                            <input type="text" class="form-control" formControlName="subject" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Customer Name</label>
+                            <input type="text" class="form-control" formControlName="customerName" required>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label">Priority</label>
+                                <select class="form-select" formControlName="priority">
+                                    @for (priority of priorityOptions; track priority) {
+                                        <option [value]="priority">{{ priority }}</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Status</label>
+                                <select class="form-select" formControlName="status">
+                                    @for (status of statusOptions; track status) {
+                                        <option [value]="status">{{ status }}</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Assigned To</label>
+                                <input type="text" class="form-control" formControlName="assignedTo">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary" data-bs-dismiss="modal">Save Ticket</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
