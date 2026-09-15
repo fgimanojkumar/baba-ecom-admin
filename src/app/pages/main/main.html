@@ -1,0 +1,186 @@
+<div class="admin-shell">
+  <div class="sidebar-backdrop" (click)="closeSidebar()"></div>
+
+  <aside class="admin-sidebar" id="adminSidebar" aria-label="Main navigation">
+    <div class="sidebar-header">
+      <a class="brand-mark" routerLink="/main/dashboard" (click)="closeSidebar()" aria-label="adminHMD ">
+        <span class="brand-icon"><i class="bi bi-grid-1x2-fill" aria-hidden="true"></i></span>
+        <span class="brand-copy">
+          <span class="brand-title">Baba Ecom</span>
+          <span class="brand-subtitle">Admin</span>
+        </span>
+      </a>
+    </div>
+
+    <nav class="sidebar-nav">
+
+      @for (item of navItems(); track item.route) {
+        <a class="nav-link" [routerLink]="item.route" routerLinkActive="active" (click)="closeSidebar()"
+          [attr.aria-current]="item.route === '/main/dashboard' ? 'page' : null">
+          <span class="nav-icon"><i class="bi {{ item.icon }}" aria-hidden="true"></i></span>
+          <span class="nav-text">{{ item.label }}</span>
+        </a>
+      }
+
+    </nav>
+
+    <div class="sidebar-user">
+      <img class="avatar-img avatar-md sidebar-user-avatar" src="../assets/images/avatar/avatar.jpg" alt="">
+      <strong>{{ currentUser()?.name || 'Guest' }}</strong>
+      <small>{{ currentUser()?.role === 'seller' ? 'Seller Workspace' : 'Super Admin Workspace' }}</small>
+    </div>
+
+    <div class="sidebar-footer">
+      <span class="status-dot"></span>
+      <span class="sidebar-footer-text">System running smoothly</span>
+    </div>
+  </aside>
+
+
+
+
+  <div class="admin-main">
+    <nav class="navbar admin-navbar navbar-expand bg-white">
+      <div class="container-fluid px-3 px-lg-4">
+        <button class="sidebar-toggle" type="button" (click)="toggleSidebar()" aria-controls="adminSidebar"
+          [attr.aria-expanded]="sidebarExpanded()" aria-label="Toggle sidebar">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+
+        <form class="d-none d-md-flex ms-3 flex-grow-1 position-relative global-search" role="search" (submit)="$event.preventDefault()">
+          <input class="form-control search-input" type="search" placeholder="Search users, orders, reports"
+            aria-label="Search" [ngModel]="searchTerm()" name="globalSearchDesktop"
+            (ngModelChange)="onSearchChange($event)" (keydown)="onSearchKeydown($event)">
+          @if (searchTerm()) {
+            <button type="button" class="search-clear-btn" aria-label="Clear search" (click)="clearSearch()">
+              <i class="bi bi-x-circle-fill" aria-hidden="true"></i>
+            </button>
+          }
+          @if (showSearchDropdown()) {
+            <div class="search-dropdown">
+              @if (searchResults().length) {
+                @for (result of searchResults(); track result.route + result.label; let i = $index) {
+                  <button type="button" class="search-result-item" [class.active]="i === activeResultIndex()"
+                    (click)="selectSearchResult(result)">
+                    <span class="search-result-icon"><i class="bi {{ result.icon }}" aria-hidden="true"></i></span>
+                    <span class="search-result-copy">
+                      <span class="search-result-label">{{ result.label }}</span>
+                      <span class="search-result-sublabel">{{ result.sublabel }}</span>
+                    </span>
+                    <span class="search-result-type badge text-bg-secondary">{{ result.type }}</span>
+                  </button>
+                }
+              } @else {
+                <div class="search-empty">
+                  <i class="bi bi-search" aria-hidden="true"></i>
+                  No results for "{{ searchTerm() }}"
+                </div>
+              }
+            </div>
+          }
+        </form>
+
+        <div class="navbar-actions ms-auto">
+          <button class="icon-button d-md-none" type="button" (click)="toggleMobileSearch()" aria-label="Toggle search">
+            <i class="bi bi-search" aria-hidden="true"></i>
+          </button>
+          <button class="icon-button theme-toggle" type="button" (click)="toggleTheme()"
+            [attr.aria-label]="theme() === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'"
+            [attr.title]="theme() === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'">
+            <i [class]="theme() === 'dark' ? 'bi bi-sun' : 'bi bi-moon-stars'" aria-hidden="true"></i>
+          </button>
+          <div class="dropdown">
+            <button class="icon-button" type="button" data-bs-toggle="dropdown" aria-expanded="false"
+              aria-label="Notifications">
+              <span class="notification-dot"></span>
+              <i class="bi bi-bell" aria-hidden="true"></i>
+            </button>
+            <div class="dropdown-menu dropdown-menu-end notification-menu">
+              <div class="dropdown-header fw-bold text-body">Notifications</div>
+              <a class="dropdown-item" href="users.html">
+                <span class="notification-title">New user registered</span>
+                <span class="notification-time">4 minutes ago</span>
+              </a>
+              <a class="dropdown-item" href="charts.html">
+                <span class="notification-title">Revenue target reached</span>
+                <span class="notification-time">32 minutes ago</span>
+              </a>
+              <a class="dropdown-item" href="settings.html">
+                <span class="notification-title">Security review completed</span>
+                <span class="notification-time">1 hour ago</span>
+              </a>
+            </div>
+          </div>
+
+          <div class="dropdown">
+            <button class="profile-button dropdown-toggle" type="button" data-bs-toggle="dropdown"
+              aria-expanded="false">
+              <img class="avatar-img avatar-sm" src="../assets/images/avatar/avatar.jpg" alt="A">
+              <span class="profile-name d-none d-sm-inline">{{ currentUser()?.name || 'Guest' }}</span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" routerLink="/main/profile">Profile</a></li>
+              <li><a class="dropdown-item" routerLink="/main/setting">Account settings</a></li>
+              <li>
+                <hr class="dropdown-divider">
+              </li>
+              <li><a class="dropdown-item" href="javascript:void(0)" (click)="logout()">Sign out</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    @if (mobileSearchOpen()) {
+      <div class="mobile-search-bar d-md-none position-relative">
+        <div class="container-fluid px-3">
+          <input class="form-control search-input" type="search" placeholder="Search users, orders, reports"
+            aria-label="Search" autofocus [ngModel]="searchTerm()" name="globalSearchMobile"
+            (ngModelChange)="onSearchChange($event)" (keydown)="onSearchKeydown($event)">
+          @if (showSearchDropdown()) {
+            <div class="search-dropdown search-dropdown-mobile">
+              @if (searchResults().length) {
+                @for (result of searchResults(); track result.route + result.label; let i = $index) {
+                  <button type="button" class="search-result-item" [class.active]="i === activeResultIndex()"
+                    (click)="selectSearchResult(result)">
+                    <span class="search-result-icon"><i class="bi {{ result.icon }}" aria-hidden="true"></i></span>
+                    <span class="search-result-copy">
+                      <span class="search-result-label">{{ result.label }}</span>
+                      <span class="search-result-sublabel">{{ result.sublabel }}</span>
+                    </span>
+                    <span class="search-result-type badge text-bg-secondary">{{ result.type }}</span>
+                  </button>
+                }
+              } @else {
+                <div class="search-empty">
+                  <i class="bi bi-search" aria-hidden="true"></i>
+                  No results for "{{ searchTerm() }}"
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    }
+    <main class="dashboard-content">
+
+
+
+      <router-outlet />
+
+
+    </main>
+
+    <footer class="admin-footer">
+      <div class="container-fluid px-3 px-lg-4">
+        <span>Copyright 2026 adminHMD. <br> Developed by <a target="_blank" class="fw-bold text-success"
+            href="https://github.com/HasanMahmudDev">Md. Hasan Mahmud</a> • Distributed by <a target="_blank"
+            class="fw-bold text-success" href="https://themewagon.com">ThemeWagon</a> </span>
+        <span>Professional dashboard template.</span>
+      </div>
+    </footer>
+  </div>
+</div>
+ 

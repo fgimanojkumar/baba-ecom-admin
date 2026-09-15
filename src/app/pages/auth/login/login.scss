@@ -1,0 +1,44 @@
+.demo-access {
+	display: grid;
+	gap: .45rem;
+	padding: .85rem;
+	border: 1px solid #e2e8f0;
+	border-radius: 12px;
+	background: #f8fafc;
+}
+
+.demo-access-heading {
+	display: flex;
+	justify-content: space-between;
+	gap: .6rem;
+	align-items: baseline;
+	margin-bottom: .2rem;
+}
+
+.demo-access-heading span { color: #1c2b42; font-size: .78rem; font-weight: 800; }
+.demo-access-heading small { color: #8290a2; font-size: .68rem; }
+
+.demo-account {
+	display: grid;
+	grid-template-columns: 110px 1fr auto;
+	align-items: center;
+	gap: .45rem;
+	width: 100%;
+	padding: .55rem .65rem;
+	border: 1px solid #e3e9f1;
+	border-radius: 8px;
+	color: #53647a;
+	background: #fff;
+	text-align: left;
+	transition: border-color .18s ease, transform .18s ease;
+}
+
+.demo-account:hover { border-color: #2864d7; transform: translateY(-1px); }
+.demo-role { color: #2864d7; font-size: .72rem; font-weight: 800; }
+.demo-credentials { overflow: hidden; color: #718097; font: .68rem ui-monospace, SFMono-Regular, Consolas, monospace; text-overflow: ellipsis; white-space: nowrap; }
+.demo-account i { color: #2864d7; }
+
+@media (max-width: 480px) {
+	.demo-account { grid-template-columns: 1fr auto; }
+	.demo-credentials { grid-column: 1 / -1; grid-row: 2; }
+}
