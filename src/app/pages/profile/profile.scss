@@ -1,0 +1,24 @@
+.profile-photo-wrap {
+  position: relative;
+  display: inline-block;
+}
+
+.profile-photo-edit {
+  position: absolute;
+  right: -0.25rem;
+  bottom: -0.25rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: #6366f1;
+  color: #fff;
+  cursor: pointer;
+  border: 2px solid var(--bs-body-bg, #fff);
+}
+
+.profile-photo-edit:hover {
+  background: #4f46e5;
+}

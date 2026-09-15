@@ -1,0 +1,867 @@
+<div class="container-fluid px-3 px-lg-4 py-4">
+    <!-- PAGE HEADING -->
+    <div class="page-heading">
+        <div class="page-heading-copy">
+            <span class="page-icon"><i class="bi bi-box-seam" aria-hidden="true"></i></span>
+            <div>
+                <h1 class="h5 mb-1 d-flex align-items-center gap-2">Products <app-page-info heading="Products"
+                        text="Add, edit, and manage your product catalog — pricing, stock, images, and status — plus bulk CSV import/export."></app-page-info>
+                </h1>
+                <p class="text-muted mb-0">Manage your product inventory, including pricing, stock, and more.</p>
+            </div>
+        </div>
+        <div class="heading-actions">
+            <button class="btn btn-outline-secondary btn-sm" (click)="exportProductsCsv()">
+                <i class="bi bi-download" aria-hidden="true"></i>
+                Export CSV
+            </button>
+            <label class="btn btn-outline-secondary btn-sm mb-0">
+                <i class="bi bi-upload" aria-hidden="true"></i>
+                Import CSV
+                <input type="file" accept=".csv" hidden (change)="importProductsCsv($event)">
+            </label>
+            <!-- <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#PRODUCTMODEL"
+                (click)="openAddModal()">
+                <i class="bi bi-plus-circle" aria-hidden="true"></i>
+                Add New Product
+            </button> -->
+            <button class="btn btn-success btn-sm" (click)="openAdd()">
+                <i class="bi bi-plus-circle" aria-hidden="true"></i>
+                Add New Product
+            </button>
+        </div>
+    </div>
+
+
+
+
+
+
+
+
+
+    <!-- manage and view product start here  -->
+    @if(isView()){
+    <section class="whiteBg mb-4">
+        <div class="d-flex justify-content-end mb-2">
+            <input class="form-control form-control-md table-search" type="search" placeholder="Search products..."
+                aria-label="Search products" [ngModel]="searchTerm()" (ngModelChange)="searchTerm.set($event)">
+        </div>
+        <ul class="nav nav-tabs" role="tablist">
+
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="active-tab" data-bs-toggle="tab" data-bs-target="#active-tab-pane"
+                    type="button" role="tab" aria-controls="active-tab-pane" aria-selected="false"><i
+                        class="bi bi-check2-circle" aria-hidden="true"></i> Active</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="inactive-tab" data-bs-toggle="tab" data-bs-target="#inactive-tab-pane"
+                    type="button" role="tab" aria-controls="inactive-tab-pane" aria-selected="false"><i
+                        class="bi bi-slash-circle" aria-hidden="true"></i> Inactive</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="draft-tab" data-bs-toggle="tab" data-bs-target="#draft-tab-pane"
+                    type="button" role="tab" aria-controls="draft-tab-pane" aria-selected="false"><i
+                        class="bi bi-file-earmark-text" aria-hidden="true"></i> Draft</button>
+            </li>
+
+        </ul>
+
+        <div class="tab-content border border-top-0 p-3">
+
+            <div class="tab-pane fade show active" id="active-tab-pane" role="tabpanel" aria-labelledby="active-tab"
+                tabindex="0">
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th scope="col">Product</th>
+                                <th scope="col">SKU</th>
+                                <th scope="col">Price</th>
+                                <th scope="col">Stock</th>
+                                <th scope="col">Status</th>
+                                <th scope="col" class="text-end">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (product of activeProducts(); track product.id()) {
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <img class="avatar-img avatar-sm"
+                                            [src]="product.images()[0]?.url || 'assets/images/avatar/avatar-fallback.jpg'"
+                                            [alt]="product.name()">
+                                        <div>
+                                            <p class="fw-semibold mb-0">{{ product.name() }}</p>
+                                            <p class="text-muted small mb-0">{{ product.category().name }}</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>{{ product.sku() }}</td>
+                                <td>{{ product.price().sellingPrice | currency:product.price().currency }}</td>
+                                <td>{{ product.inventory().stock }}</td>
+                                <td>
+                                    <span class="badge"
+                                        [ngClass]="{'text-bg-success': product.status() === 'ACTIVE', 'text-bg-warning': product.status() === 'DRAFT', 'text-bg-danger': product.status() === 'INACTIVE'}">
+                                        {{ product.status() }}
+                                    </span>
+                                </td>
+                                <td class="text-end">
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-info dropdown-toggle btn-sm"
+                                            data-bs-toggle="dropdown" aria-expanded="false">Action</button>
+                                        <ul class="dropdown-menu">
+                                            <li><a class="dropdown-item" data-bs-toggle="modal"
+                                                    data-bs-target="#PRODUCTMODEL"
+                                                    (click)="openEditModal(product)">Edit</a></li>
+                                            <li><a class="dropdown-item" href="javascript:void(0)"
+                                                    (click)="deleteProduct(product.id())">Delete</a></li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                            } @empty {
+                            <tr>
+                                <td colspan="6" class="text-center text-muted">No products found. Click "Add New
+                                    Product" to get
+                                    started.</td>
+                            </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="tab-pane fade show" id="inactive-tab-pane" role="tabpanel" aria-labelledby="inactive-tab"
+                tabindex="0">
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th scope="col">Product</th>
+                                <th scope="col">SKU</th>
+                                <th scope="col">Price</th>
+                                <th scope="col">Stock</th>
+                                <th scope="col">Status</th>
+                                <th scope="col" class="text-end">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (product of inactiveProducts(); track product.id()) {
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <img class="avatar-img avatar-sm"
+                                            [src]="product.images()[0]?.url || 'assets/images/avatar/avatar-fallback.jpg'"
+                                            [alt]="product.name()">
+                                        <div>
+                                            <p class="fw-semibold mb-0">{{ product.name() }}</p>
+                                            <p class="text-muted small mb-0">{{ product.category().name }}</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>{{ product.sku() }}</td>
+                                <td>{{ product.price().sellingPrice | currency:product.price().currency }}</td>
+                                <td>{{ product.inventory().stock }}</td>
+                                <td>
+                                    <span class="badge"
+                                        [ngClass]="{'text-bg-success': product.status() === 'ACTIVE', 'text-bg-warning': product.status() === 'DRAFT', 'text-bg-danger': product.status() === 'INACTIVE'}">
+                                        {{ product.status() }}
+                                    </span>
+                                </td>
+                                <td class="text-end">
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-info dropdown-toggle btn-sm"
+                                            data-bs-toggle="dropdown" aria-expanded="false">Action</button>
+                                        <ul class="dropdown-menu">
+                                            <li><a class="dropdown-item" data-bs-toggle="modal"
+                                                    data-bs-target="#PRODUCTMODEL"
+                                                    (click)="openEditModal(product)">Edit</a></li>
+                                            <li><a class="dropdown-item" href="javascript:void(0)"
+                                                    (click)="deleteProduct(product.id())">Delete</a></li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                            } @empty {
+                            <tr>
+                                <td colspan="6" class="text-center text-muted">No products found. Click "Add New
+                                    Product" to get
+                                    started.</td>
+                            </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="tab-pane fade show" id="draft-tab-pane" role="tabpanel" aria-labelledby="draft-tab"
+                tabindex="0">
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th scope="col">Product</th>
+                                <th scope="col">SKU</th>
+                                <th scope="col">Price</th>
+                                <th scope="col">Stock</th>
+                                <th scope="col">Status</th>
+                                <th scope="col" class="text-end">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (product of draftProducts(); track product.id()) {
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <img class="avatar-img avatar-sm"
+                                            [src]="product.images()[0]?.url || 'assets/images/avatar/avatar-fallback.jpg'"
+                                            [alt]="product.name()">
+                                        <div>
+                                            <p class="fw-semibold mb-0">{{ product.name() }}</p>
+                                            <p class="text-muted small mb-0">{{ product.category().name }}</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>{{ product.sku() }}</td>
+                                <td>{{ product.price().sellingPrice | currency:product.price().currency }}</td>
+                                <td>{{ product.inventory().stock }}</td>
+                                <td>
+                                    <span class="badge"
+                                        [ngClass]="{'text-bg-success': product.status() === 'ACTIVE', 'text-bg-warning': product.status() === 'DRAFT', 'text-bg-danger': product.status() === 'INACTIVE'}">
+                                        {{ product.status() }}
+                                    </span>
+                                </td>
+                                <td class="text-end">
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-info dropdown-toggle btn-sm"
+                                            data-bs-toggle="dropdown" aria-expanded="false">Action</button>
+                                        <ul class="dropdown-menu">
+                                            <li><a class="dropdown-item" data-bs-toggle="modal"
+                                                    data-bs-target="#PRODUCTMODEL"
+                                                    (click)="openEditModal(product)">Edit</a></li>
+                                            <li><a class="dropdown-item" href="javascript:void(0)"
+                                                    (click)="deleteProduct(product.id())">Delete</a></li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                            } @empty {
+                            <tr>
+                                <td colspan="6" class="text-center text-muted">No products found. Click "Add New
+                                    Product" to get
+                                    started.</td>
+                            </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+    </section>
+    }
+    <!-- manage and view product end here  -->
+
+
+
+    @if (isViewProduct()) {
+    @if (selectedProduct(); as product) {
+    <section class="product-view-shell mb-4">
+        <div class="product-view-header d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <div class="small text-uppercase text-muted fw-semibold mb-1">Product preview</div>
+                <h2 class="h4 mb-0">{{ product.name() }}</h2>
+            </div>
+            <div class="d-flex gap-2">
+                <button type="button" class="btn btn-outline-secondary btn-sm" (click)="openEditModal(product)">
+                    <i class="bi bi-pencil-square"></i> Edit
+                </button>
+                <button type="button" class="btn btn-light btn-sm" (click)="closeProductView()">
+                    <i class="bi bi-x-lg"></i> Close
+                </button>
+            </div>
+        </div>
+
+        <div class="row g-4 mt-1">
+            <div class="col-lg-4">
+                <div class="product-view-media">
+                    <img [src]="product.images()[0]?.url || 'assets/images/avatar/avatar-fallback.jpg'"
+                        [alt]="product.name()" />
+                </div>
+            </div>
+            <div class="col-lg-8">
+                <div class="product-view-grid">
+                    <div class="product-view-card">
+                        <span class="product-view-label">SKU</span>
+                        <strong>{{ product.sku() }}</strong>
+                    </div>
+                    <div class="product-view-card">
+                        <span class="product-view-label">Status</span>
+                        <strong>{{ product.status() }}</strong>
+                    </div>
+                    <div class="product-view-card">
+                        <span class="product-view-label">Price</span>
+                        <strong>{{ product.price().sellingPrice | currency:product.price().currency }}</strong>
+                    </div>
+                    <div class="product-view-card">
+                        <span class="product-view-label">Stock</span>
+                        <strong>{{ product.inventory().stock }}</strong>
+                    </div>
+                    <div class="product-view-card full-width">
+                        <span class="product-view-label">Description</span>
+                        <strong>{{ product.description() || 'No description added yet.' }}</strong>
+                    </div>
+                    <div class="product-view-card full-width">
+                        <span class="product-view-label">Category</span>
+                        <strong>{{ product.category().name }}</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    }
+    }
+
+    <!-- add new product start here  -->
+    @if(isAddNewProduct()){
+    <section class="product-form-shell mb-4">
+        <div class="product-form-layout">
+            <div class="product-form-main">
+                <form [formGroup]="productForm" (ngSubmit)="saveProduct()" class="product-form-card">
+                    <div class="modal-body product-form-body">
+                        <ul class="nav nav-tabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="general-tab" data-bs-toggle="tab"
+                                    data-bs-target="#general-tab-pane" type="button" role="tab"
+                                    aria-controls="general-tab-pane" aria-selected="true"><i class="bi bi-info-circle"
+                                        aria-hidden="true"></i> General</button>
+                            </li>
+                            <li class="nav-item" role="presentation"><button class="nav-link" id="pricing-tab"
+                                    data-bs-toggle="tab" data-bs-target="#pricing-tab-pane" type="button" role="tab"
+                                    aria-controls="pricing-tab-pane" aria-selected="false"><i
+                                        class="bi bi-currency-rupee" aria-hidden="true"></i> Pricing</button>
+                            </li>
+                            <li class="nav-item" role="presentation"><button class="nav-link" id="inventory-tab"
+                                    data-bs-toggle="tab" data-bs-target="#inventory-tab-pane" type="button" role="tab"
+                                    aria-controls="inventory-tab-pane" aria-selected="false"><i class="bi bi-boxes"
+                                        aria-hidden="true"></i> Inventory</button>
+                            </li>
+                            <li class="nav-item" role="presentation"><button class="nav-link" id="details-tab"
+                                    data-bs-toggle="tab" data-bs-target="#details-tab-pane" type="button" role="tab"
+                                    aria-controls="details-tab-pane" aria-selected="false"><i class="bi bi-card-list"
+                                        aria-hidden="true"></i> Details</button>
+                            </li>
+                            <li class="nav-item" role="presentation"><button class="nav-link" id="shipping-tab"
+                                    data-bs-toggle="tab" data-bs-target="#shipping-tab-pane" type="button" role="tab"
+                                    aria-controls="shipping-tab-pane" aria-selected="false"><i class="bi bi-truck"
+                                        aria-hidden="true"></i> Shipping</button>
+                            </li>
+                            <li class="nav-item" role="presentation"><button class="nav-link" id="seo-tab"
+                                    data-bs-toggle="tab" data-bs-target="#seo-tab-pane" type="button" role="tab"
+                                    aria-controls="seo-tab-pane" aria-selected="false"><i class="bi bi-search"
+                                        aria-hidden="true"></i> SEO & More</button>
+                            </li>
+                        </ul>
+
+                        <div class="tab-content border border-top-0 p-3">
+
+                            <div class="tab-pane fade show active" id="general-tab-pane" role="tabpanel"
+                                aria-labelledby="general-tab" tabindex="0">
+                                <h6 class="mt-3">Basic Information</h6>
+                                <div class="row g-3">
+                                    <div class="col-md-4" formGroupName="seller">
+                                        <label class="form-label">Seller</label>
+                                        <mks-dropdown placeholder="Select seller" [outlined]="true"
+                                            [dataArray]="sellerOptions()" [valueKey]="'id'" [labelKey]="'businessName'"
+                                            [searchFields]="['ownerName', 'email']" [showSearchFields]="true"
+                                            [multipleSelect]="false" [maxSelect]="1" (onChange)="selectSeller($event)">
+                                            <select #mksDropdown formControlName="id">
+                                                <option value="">Select seller</option>
+                                                @for (seller of sellers(); track seller.id) {
+                                                <option [value]="seller.id">{{ seller.businessName }} </option>
+                                                }
+                                            </select>
+                                        </mks-dropdown>
+                                    </div>
+                                    <div class="col-md-4" formGroupName="category"><label
+                                            class="form-label">Category</label><mks-dropdown
+                                            placeholder="Select category" [outlined]="true" [showSearchFields]="true" [multipleSelect]="false"
+                                            [maxSelect]="1" (onChange)="selectCategory($event)"><select #mksDropdown
+                                                formControlName="id">
+                                                <option value="">Select category</option>@for (category of categories();
+                                                track category.id) { <option [value]="category.id">{{ category.name }}
+                                                </option> }
+                                            </select></mks-dropdown></div>
+                                    <div class="col-md-4" formGroupName="subCategory"><label
+                                            class="form-label">Subcategory</label><mks-dropdown
+                                            placeholder="Select subcategory" [outlined]="true" [showSearchFields]="true"
+                                            [disabled]="!productForm.get('category.id')?.value" [multipleSelect]="false"
+                                            [maxSelect]="1" (onChange)="selectSubCategory($event)"><select #mksDropdown
+                                                formControlName="id">
+                                                <option value="">Select subcategory</option>@for (subcategory of
+                                                availableSubCategories(); track subcategory.id) { <option
+                                                    [value]="subcategory.id">{{ subcategory.name }}</option> }
+                                            </select></mks-dropdown></div>
+                                    <div class="col-md-8"><label class="form-label">Product Name</label><input
+                                            type="text" class="form-control" formControlName="name"
+                                            placeholder="e.g. Wireless Noise Cancelling Headphones"></div>
+                                    <div class="col-md-4"><label class="form-label">Slug</label><input type="text"
+                                            class="form-control" formControlName="slug"
+                                            placeholder="wireless-headphones"></div>
+                                    <div class="col-12"><label class="form-label">Short Description</label><input
+                                            type="text" class="form-control" formControlName="shortDescription"
+                                            placeholder="Brief product summary"></div>
+                                    <div class="col-12"><label class="form-label">Full Description</label><textarea
+                                            class="form-control" formControlName="description" rows="4"
+                                            placeholder="Describe product quality, features, and key selling points"></textarea>
+                                    </div>
+                                </div>
+                                <hr>
+                                <h6 class="mt-3">Identification</h6>
+                                <div class="row g-3">
+                                    <div class="col-md-6"><label class="form-label">SKU</label><input type="text"
+                                            class="form-control" formControlName="sku" placeholder="SKU-1001"></div>
+                                    <div class="col-md-6"><label class="form-label">Barcode (EAN, UPC)</label><input
+                                            type="text" class="form-control" formControlName="barcode"
+                                            placeholder="8901234567890"></div>
+                                    <div class="col-md-6"><label class="form-label">HSN Code <span
+                                                class="text-danger">*</span></label><input type="text"
+                                            class="form-control" formControlName="hsnCode" placeholder="e.g., 3401"
+                                            required>
+                                        @if (productForm.get('hsnCode')?.invalid && productForm.get('hsnCode')?.touched)
+                                        {
+                                        <div class="text-danger small mt-1">HSN code is required for product tax.</div>
+                                        }
+                                    </div>
+                                    <div class="col-md-6"><label class="form-label">Manufacturer</label><input
+                                            type="text" class="form-control" formControlName="manufacturer"
+                                            placeholder="Brand or manufacturer name"></div>
+                                </div>
+                                <hr>
+                                <h6 class="mt-3">Brand & Categorization</h6>
+                                <div class="row g-3" formGroupName="brand">
+                                    <div class="col-md-6"><label class="form-label">Brand</label><input type="text"
+                                            class="form-control" formControlName="name"></div>
+                                </div>
+                                <hr>
+                                <h6 class="mt-3">Product Status</h6>
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <label class="form-label">Status</label>
+                                        <mks-dropdown label="" [outlined]="true" [required]="false"
+                                            placeholder="Select status " [showSearchFields]="true" [multipleSelect]="false" [maxSelect]="1"
+                                            [searchFields]="['tags']" [showSearchFields]="true" grouping="group"
+                                            [showGrouping]="true" badges="badge" [showBadges]="true" icons="icon"
+                                            [showIcons]="true" multiSelectCheckboxColor="#6366f1"
+                                            (onChange)="skill($event)">
+                                            <select #mksDropdown formControlName="status">
+                                                <option value="">-- Select --</option>
+                                                @for (status of productStatus; track $index) {
+                                                <option [value]="status">{{ status }}</option>
+                                                }
+                                            </select>
+                                        </mks-dropdown>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane fade" id="pricing-tab-pane" role="tabpanel"
+                                aria-labelledby="pricing-tab" tabindex="0">
+                                <div formGroupName="price">
+                                    <div class="row g-3">
+                                        <h6 class="mt-3">Core Pricing</h6>
+                                        <div class="col-md-3">
+                                            <label class="form-label">M.R.P.</label>
+                                            <input type="number" class="form-control" formControlName="mrp"
+                                                placeholder="4999">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label">Cost Price</label>
+                                            <input type="number" class="form-control" formControlName="costPrice"
+                                                placeholder="3200">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label">Selling Price</label>
+                                            <input type="number" class="form-control" formControlName="sellingPrice"
+                                                placeholder="3799">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label">Currency</label>
+                                            <input type="text" class="form-control" formControlName="currency"
+                                                placeholder="INR">
+                                        </div>
+                                    </div>
+                                    <hr>
+                                    <div class="row g-3">
+                                        <h6 class="mt-3">Discount</h6>
+                                        <div formGroupName="discount" class="row g-3">
+                                            <div class="col-md-6">
+                                                <label class="form-label">Discount Value</label>
+                                                <input type="number" class="form-control" formControlName="value"
+                                                    placeholder="10">
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label">Discount Type</label>
+                                                <mks-dropdown placeholder="Select discount type" [outlined]="true" [showSearchFields]="true"
+                                                    [multipleSelect]="false" [maxSelect]="1">
+                                                    <select #mksDropdown formControlName="type">
+                                                        <option value="percentage">Percentage (%)</option>
+                                                        <option value="fixed">Fixed amount</option>
+                                                    </select>
+                                                </mks-dropdown>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <hr>
+                                    <div class="row g-3">
+                                        <h6 class="mt-3">Tax</h6>
+                                        <div formGroupName="tax" class="row g-3">
+                                            <div class="col-md-6">
+                                                <label class="form-label">GST Source</label>
+                                                <select class="form-select" formControlName="source">
+                                                    <option value="product">Product / HSN rate</option>
+                                                    <option value="category">Use category suggestion</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label">Product GST (%)</label>
+                                                <select class="form-select" formControlName="gst">
+                                                    <option [ngValue]="0">0%</option>
+                                                    <option [ngValue]="5">5%</option>
+                                                    <option [ngValue]="12">12%</option>
+                                                    <option [ngValue]="18">18%</option>
+                                                    <option [ngValue]="28">28%</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-6 form-check ms-2">
+                                                <input class="form-check-input" type="checkbox"
+                                                    formControlName="inclusive" id="productTaxInclusive">
+                                                <label class="form-check-label" for="productTaxInclusive">Selling price
+                                                    includes GST</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane fade" id="inventory-tab-pane" role="tabpanel"
+                                aria-labelledby="inventory-tab" tabindex="0">
+                                <div formGroupName="inventory">
+                                    <h6 class="mt-3">Main Stock</h6>
+                                    <div class="row g-3">
+                                        <div class="col-md-4">
+                                            <label class="form-label">Stock</label>
+                                            <input type="number" class="form-control" formControlName="stock">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label">Min Stock Level</label>
+                                            <input type="number" class="form-control" formControlName="minStock">
+                                        </div>
+                                        <div class="col-md-4"><label class="form-label">Max Order Qty</label><input
+                                                type="number" class="form-control" formControlName="maxOrderQuantity">
+                                        </div>
+                                    </div>
+                                    <div class="row g-3 mt-1">
+                                        <div class="col-md-6 d-flex align-items-center pt-3">
+                                            <mks-toggle formControlName="trackInventory" color="#10b981"
+                                                offColor="#d1d5db" size="md" label="Track inventory" onLabel="On"
+                                                offLabel="Off">
+                                            </mks-toggle>
+                                        </div>
+                                        <div class="col-md-6 d-flex align-items-center pt-3">
+                                            <mks-toggle formControlName="allowBackorder" color="#10b981"
+                                                offColor="#d1d5db" size="md" label="Allow backorders" onLabel="On"
+                                                offLabel="Off">
+                                            </mks-toggle>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr>
+                                <div formArrayName="variants">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <h6 class="mt-3">Variants</h6>
+                                        <button type="button" class="btn btn-sm btn-outline-primary"
+                                            (click)="addVariant()"><i class="bi bi-plus-circle"></i> Add
+                                            Variant</button>
+                                    </div>
+                                    @for(variant of variants.controls; track $index) {
+                                    <div [formGroupName]="$index"
+                                        class="row g-3 align-items-end mt-1 p-2 border rounded">
+                                        <div class="col-md-3"><label class="form-label">Size</label><input type="text"
+                                                class="form-control" formControlName="size"></div>
+                                        <div class="col-md-3"><label class="form-label">Color</label><input type="text"
+                                                class="form-control" formControlName="color"></div>
+                                        <div class="col-md-2"><label class="form-label">SKU</label><input type="text"
+                                                class="form-control" formControlName="sku"></div>
+                                        <div class="col-md-2"><label class="form-label">Price</label><input
+                                                type="number" class="form-control" formControlName="price"></div>
+                                        <div class="col-md-1"><label class="form-label">Stock</label><input
+                                                type="number" class="form-control" formControlName="stock"></div>
+                                        <div class="col-md-1"><button type="button" class="btn btn-sm btn-danger"
+                                                (click)="removeVariant($index)"><i class="bi bi-trash"></i></button>
+                                        </div>
+                                    </div>
+                                    }
+                                </div>
+                            </div>
+
+
+                            <div class="tab-pane fade" id="details-tab-pane" role="tabpanel"
+                                aria-labelledby="details-tab" tabindex="0">
+                                <h6 class="mt-3">Product Details</h6>
+                                <div class="row g-3">
+                                    <div class="col-md-6"><label class="form-label">Gender</label><input type="text"
+                                            class="form-control" formControlName="gender"></div>
+                                    <div class="col-md-6"><label class="form-label">Age Group</label><input type="text"
+                                            class="form-control" formControlName="ageGroup"></div>
+                                    <div class="col-12"><label class="form-label">Skin Type
+                                            (comma-separated)</label><input type="text" class="form-control"
+                                            formControlName="skinType"></div>
+                                </div>
+                                <hr>
+                                <h6 class="mt-3">Lists (comma-separated)</h6>
+                                <div class="row g-3">
+                                    <div class="col-12"><label class="form-label">Collections</label><input type="text"
+                                            class="form-control" formControlName="collections"></div>
+                                    <div class="col-12"><label class="form-label">Tags</label><input type="text"
+                                            class="form-control" formControlName="tags"></div>
+                                    <div class="col-12"><label class="form-label">Ingredients</label><textarea
+                                            class="form-control" formControlName="ingredients" rows="2"></textarea>
+                                    </div>
+                                    <div class="col-12"><label class="form-label">Benefits</label><textarea
+                                            class="form-control" formControlName="benefits" rows="2"></textarea></div>
+                                    <div class="col-12"><label class="form-label">How to Use</label><textarea
+                                            class="form-control" formControlName="howToUse" rows="2"></textarea></div>
+                                    <div class="col-12"><label class="form-label">Warnings</label><textarea
+                                            class="form-control" formControlName="warnings" rows="2"></textarea></div>
+                                </div>
+                                <hr>
+                                <h6 class="mt-3">Media</h6>
+                                <div class="mb-3">
+                                    <label class="form-label">Product Images</label>
+                                    <input type="file" class="form-control" (change)="onImagesSelected($event)"
+                                        accept="image/*" multiple>
+                                    <div class="form-text">You can select multiple images at once.</div>
+                                </div>
+
+
+                                <div formArrayName="images" class="row g-3">
+                                    @for(imageGroup of images.controls; track $index) {
+                                    <div [formGroupName]="$index" class="col-md-4">
+                                        <div class="card">
+                                            <img [src]="imageGroup.get('url')?.value" class="card-img-top"
+                                                style="height: 150px; object-fit: cover;">
+                                            <div class="card-body">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" name="primaryImage"
+                                                        [id]="'primary' + $index"
+                                                        [checked]="imageGroup.get('isPrimary')?.value"
+                                                        (change)="setPrimaryImage($index)">
+                                                    <label class="form-check-label" [for]="'primary' + $index">
+                                                        Primary
+                                                    </label>
+                                                </div>
+                                                <button type="button" class="btn btn-sm btn-danger mt-2"
+                                                    (click)="removeImage($index)"><i class="bi bi-trash"></i>
+                                                    Remove</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    }
+                                </div>
+                            </div>
+
+
+                            <div class="tab-pane fade" id="shipping-tab-pane" role="tabpanel"
+                                aria-labelledby="shipping-tab" tabindex="0">
+                                <div formGroupName="shipping">
+                                    <h6 class="mt-3">Dimensions</h6>
+                                    <div class="row g-3">
+                                        <div class="col-md-3"><label class="form-label">Weight (kg)</label><input
+                                                type="number" class="form-control" formControlName="weight"></div>
+                                        <div class="col-md-3"><label class="form-label">Width (cm)</label><input
+                                                type="number" class="form-control" formControlName="width"></div>
+                                        <div class="col-md-3"><label class="form-label">Height (cm)</label><input
+                                                type="number" class="form-control" formControlName="height"></div>
+                                        <div class="col-md-3"><label class="form-label">Length (cm)</label><input
+                                                type="number" class="form-control" formControlName="length"></div>
+                                    </div>
+                                    <hr>
+                                    <h6 class="mt-3">Fees & Policy</h6>
+                                    <div class="row g-3">
+                                        <div class="col-md-6"><label class="form-label">Shipping Charge</label><input
+                                                type="number" class="form-control" formControlName="shippingCharge">
+                                        </div>
+                                        <div class="col-md-6 d-flex align-items-center pt-3">
+                                            <mks-toggle formControlName="freeShipping" color="#10b981"
+                                                offColor="#d1d5db" size="md" label="Free shipping" onLabel="On"
+                                                offLabel="Off">
+                                            </mks-toggle>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr>
+                                <div formGroupName="returnPolicy">
+                                    <h6 class="mt-3">Return Policy</h6>
+                                    <div class="row g-3">
+                                        <div class="col-md-6"><label class="form-label">Return Period
+                                                (days)</label><input type="number" class="form-control"
+                                                formControlName="returnDays"></div>
+                                        <div class="col-md-6 d-flex align-items-center pt-3">
+                                            <mks-toggle formControlName="returnable" color="#10b981" offColor="#d1d5db"
+                                                size="md" label="Product is returnable" onLabel="On" offLabel="Off">
+                                            </mks-toggle>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr>
+                                <div formGroupName="warranty">
+                                    <h6 class="mt-3">Warranty</h6>
+                                    <div class="row g-3">
+                                        <div class="col-md-6"><label class="form-label">Warranty Duration</label><input
+                                                type="text" class="form-control" formControlName="duration"></div>
+                                        <div class="col-md-6 d-flex align-items-center pt-3">
+                                            <mks-toggle formControlName="available" color="#10b981" offColor="#d1d5db"
+                                                size="md" label="Warranty available" onLabel="On" offLabel="Off">
+                                            </mks-toggle>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <div class="tab-pane fade" id="seo-tab-pane" role="tabpanel" aria-labelledby="seo-tab"
+                                tabindex="0">
+                                <div formGroupName="seo">
+                                    <h6 class="mt-3">SEO</h6>
+                                    <div class="row g-3">
+                                        <div class="col-12"><label class="form-label">SEO Title</label><input
+                                                type="text" class="form-control" formControlName="title"></div>
+                                        <div class="col-12"><label class="form-label">SEO Description</label><textarea
+                                                class="form-control" formControlName="description" rows="2"></textarea>
+                                        </div>
+                                        <div class="col-12"><label class="form-label">SEO Keywords
+                                                (comma-separated)</label><input type="text" class="form-control"
+                                                formControlName="keywords"></div>
+                                    </div>
+                                </div>
+                                <hr>
+                                <div formGroupName="rating">
+                                    <h6 class="mt-3">Ratings (Read-only)</h6>
+                                    <div class="row g-3">
+                                        <div class="col-md-4"><label class="form-label">Average Rating</label><input
+                                                type="number" class="form-control" formControlName="average"></div>
+                                        <div class="col-md-4"><label class="form-label">Total Reviews</label><input
+                                                type="number" class="form-control" formControlName="totalReviews"></div>
+                                        <div class="col-md-4"><label class="form-label">Total Ratings</label><input
+                                                type="number" class="form-control" formControlName="totalRatings"></div>
+                                    </div>
+                                </div>
+                                <hr>
+                                <div formGroupName="sales">
+                                    <h6 class="mt-3">Sales Data (Read-only)</h6>
+                                    <div class="row g-3">
+                                        <div class="col-md-4"><label class="form-label">Units Sold</label><input
+                                                type="number" class="form-control" formControlName="sold"></div>
+                                        <div class="col-md-4"><label class="form-label">Wishlist Count</label><input
+                                                type="number" class="form-control" formControlName="wishlistCount">
+                                        </div>
+                                        <div class="col-md-4"><label class="form-label">View Count</label><input
+                                                type="number" class="form-control" formControlName="viewCount"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="product-form-actions">
+                        @if (isEditMode() && selectedProduct(); as product) {
+                        <button type="button" class="btn btn-outline-danger product-delete-btn"
+                            (click)="deleteProduct(product.id())" data-bs-dismiss="modal"><i class="bi bi-trash3"
+                                aria-hidden="true"></i> Delete Product</button>
+                        }
+                        <div class="product-form-actions-main">
+                            <button type="button" class="btn btn-outline-secondary" (click)="cancelAllProduct()"
+                                data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary" [disabled]="productForm.invalid"
+                                data-bs-dismiss="modal">{{ isEditMode() ? 'Update' : 'Save' }} Product</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <aside class="product-form-side">
+                <div class="product-side-card">
+                    <div class="product-side-upload">
+                        <div class="upload-icon-wrap">
+                            <i class="bi bi-cloud-arrow-up-fill" aria-hidden="true"></i>
+                        </div>
+                        <h5>Product media</h5>
+                        <p>Upload clear front-view and lifestyle images. Recommended size is 1200x1200px for the best
+                            storefront preview.</p>
+                        <label class="upload-dropzone" for="product-upload-input">
+                            <input id="product-upload-input" type="file" accept="image/*" multiple
+                                (change)="onImagesSelected($event)" hidden>
+                            <span class="upload-dropzone-icon"><i class="bi bi-image-fill"
+                                    aria-hidden="true"></i></span>
+                            <span class="upload-dropzone-text">Upload Images</span>
+                            <small>PNG, JPG, WEBP up to 10 files</small>
+                        </label>
+                    </div>
+
+                    <div class="product-side-guide">
+                        <div class="guide-title">Quick guide</div>
+                        <ul>
+                            <li>Use a clean background image as primary image.</li>
+                            <li>Keep product tags and text minimal for better focus.</li>
+                            <li>Upload at least 3 images to improve trust and conversion.</li>
+                        </ul>
+                    </div>
+
+                    <div class="product-side-gallery">
+                        <div class="gallery-header">
+                            <span>Current images</span>
+                            <small>{{ images.length }} files</small>
+                        </div>
+
+                        @if (images.length > 0) {
+                        <div class="gallery-grid">
+                            @for(imageGroup of images.controls; track $index) {
+                            <div class="gallery-item" [class.is-primary]="imageGroup.get('isPrimary')?.value">
+                                <img [src]="imageGroup.get('url')?.value || 'assets/images/avatar/avatar-fallback.jpg'"
+                                    [alt]="'Product image ' + ($index + 1)">
+                                <div class="gallery-item-actions">
+                                    <button type="button" class="btn btn-sm btn-light"
+                                        (click)="setPrimaryImage($index)">
+                                        {{ imageGroup.get('isPrimary')?.value ? 'Primary' : 'Set primary' }}
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-danger"
+                                        (click)="removeImage($index)">
+                                        Remove
+                                    </button>
+                                </div>
+                            </div>
+                            }
+                        </div>
+                        } @else {
+                        <div class="empty-gallery">
+                            <i class="bi bi-image" aria-hidden="true"></i>
+                            <p>No images uploaded yet.</p>
+                        </div>
+                        }
+                    </div>
+                </div>
+            </aside>
+        </div>
+
+    </section>
+    }
+    <mks-loader [visible]="saving()" title="Saving product" message="Updating the product catalog" type="spinner"
+        backdrop="blur"></mks-loader>
+    <!-- add new product end here  -->
+
+
+
+
+</div>

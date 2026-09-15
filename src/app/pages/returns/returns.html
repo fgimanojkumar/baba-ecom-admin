@@ -1,0 +1,394 @@
+<div class="container-fluid px-3 px-lg-4 py-4">
+    <!-- PAGE HEADING -->
+    <div class="page-heading">
+        <div class="page-heading-copy">
+            <span class="page-icon"><i class="bi bi-arrow-return-left" aria-hidden="true"></i></span>
+            <div>
+                <h1 class="h5 mb-1 d-flex align-items-center gap-2">Product Returns <app-page-info heading="Product Returns" text="Review and process customer return requests through approval, transit, and completion, including refunds."></app-page-info></h1>
+                <p class="text-muted mb-0">Manage and process customer return requests.</p>
+            </div>
+        </div>
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#returnRequestModal">
+            <i class="bi bi-arrow-return-left me-1" aria-hidden="true"></i> Create Return Request
+        </button>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-md-6">
+            <mks-calendar mode="single" color="#6366f1" dateFormat="DD MMM YYYY" placeholder="Start date"
+                [showToday]="true" [firstDayOfWeek]="1" [inline]="false" (onChange)="onStartDateChange($event)">
+            </mks-calendar>
+        </div>
+        <div class="col-md-6">
+            <mks-calendar mode="single" color="#6366f1" dateFormat="DD MMM YYYY" placeholder="End date"
+                [showToday]="true" [firstDayOfWeek]="1" [inline]="false" (onChange)="onEndDateChange($event)">
+            </mks-calendar>
+        </div>
+    </div>
+
+    <section>
+        <div class="status-tabs mt-3" role="tablist">
+            <button type="button" class="status-tab" [class.active]="activeStatus() === 'pending'"
+                (click)="setStatus('pending')">
+                <span class="status-tab-icon"><i class="bi bi-hourglass-split" aria-hidden="true"></i></span>
+                <span class="status-tab-label">Pending</span>
+                <span class="status-tab-count">{{ counts().pending }}</span>
+            </button>
+            <button type="button" class="status-tab" [class.active]="activeStatus() === 'approved'"
+                (click)="setStatus('approved')">
+                <span class="status-tab-icon"><i class="bi bi-check2-circle" aria-hidden="true"></i></span>
+                <span class="status-tab-label">Approved</span>
+                <span class="status-tab-count">{{ counts().approved }}</span>
+            </button>
+            <button type="button" class="status-tab" [class.active]="activeStatus() === 'issued'"
+                (click)="setStatus('issued')">
+                <span class="status-tab-icon"><i class="bi bi-box-arrow-up-right" aria-hidden="true"></i></span>
+                <span class="status-tab-label">Return Issued</span>
+                <span class="status-tab-count">{{ counts().issued }}</span>
+            </button>
+            <button type="button" class="status-tab" [class.active]="activeStatus() === 'in-transit'"
+                (click)="setStatus('in-transit')">
+                <span class="status-tab-icon"><i class="bi bi-truck" aria-hidden="true"></i></span>
+                <span class="status-tab-label">In Transit</span>
+                <span class="status-tab-count">{{ counts().inTransit }}</span>
+            </button>
+            <button type="button" class="status-tab" [class.active]="activeStatus() === 'inspection'" (click)="setStatus('inspection')">
+                <span class="status-tab-icon"><i class="bi bi-clipboard2-check" aria-hidden="true"></i></span><span class="status-tab-label">Quality Check</span><span class="status-tab-count">{{ counts().inspection }}</span>
+            </button>
+            <button type="button" class="status-tab" [class.active]="activeStatus() === 'completed'"
+                (click)="setStatus('completed')">
+                <span class="status-tab-icon"><i class="bi bi-bag-check" aria-hidden="true"></i></span>
+                <span class="status-tab-label">Completed</span>
+                <span class="status-tab-count">{{ counts().completed }}</span>
+            </button>
+            <button type="button" class="status-tab" [class.active]="activeStatus() === 'rejected'"
+                (click)="setStatus('rejected')">
+                <span class="status-tab-icon"><i class="bi bi-x-circle" aria-hidden="true"></i></span>
+                <span class="status-tab-label">Rejected</span>
+                <span class="status-tab-count">{{ counts().rejected }}</span>
+            </button>
+        </div>
+
+        <section class="panel mt-3">
+            <div class="panel-header">
+                <h2 class="h5 mb-1 section-title">
+                    @switch (activeStatus()) {
+                        @case ('pending') { Pending Requests }
+                        @case ('approved') { Approved Requests }
+                        @case ('issued') { Return Issued }
+                        @case ('in-transit') { Returns In Transit }
+                        @case ('inspection') { Quality Inspection }
+                        @case ('completed') { Completed Returns }
+                        @case ('rejected') { Rejected Requests }
+                    }
+                </h2>
+                <input class="form-control form-control-md table-search" type="search"
+                    placeholder="Search return, order or customer..." aria-label="Search returns"
+                    [ngModel]="searchTerm()" (ngModelChange)="searchTerm.set($event)">
+            </div>
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Return ID</th>
+                            <th>Order ID</th>
+                            <th>Customer</th>
+                            <th>Product</th>
+                            @switch (activeStatus()) {
+                                @case ('pending') { <th>Reason</th><th>Date Submitted</th> }
+                                @case ('in-transit') { <th>Tracking ID</th> }
+                                @case ('inspection') { <th>Inspection Status</th> }
+                                @case ('issued') { <th>Reverse Pickup</th> }
+                                @case ('completed') { <th>Refund Status</th> }
+                                @case ('rejected') { <th>Reason for Rejection</th> }
+                            }
+                            <th class="text-end">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (request of filteredReturns(); track request.id) {
+                            <tr>
+                                <td>#{{ request.id }}</td>
+                                <td>#{{ request.orderId }}</td>
+                                <td>{{ request.customerName }}</td>
+                                <td>{{ request.product }}</td>
+                                @switch (activeStatus()) {
+                                    @case ('pending') {
+                                        <td>{{ request.reason }}</td>
+                                        <td>{{ request.dateSubmitted }}</td>
+                                        <td class="text-end">
+                                            <button class="btn btn-sm btn-success" (click)="approve(request)">Approve</button>
+                                            <button class="btn btn-sm btn-danger ms-1" (click)="reject(request)">Reject</button>
+                                            <button class="btn btn-sm btn-outline-secondary ms-1" data-bs-toggle="modal"
+                                                data-bs-target="#returnDetailsModal" (click)="viewReturn(request)">View</button>
+                                        </td>
+                                    }
+                                    @case ('approved') {
+                                        <td class="text-end">
+                                            <button class="btn btn-sm btn-primary" (click)="issueReturn(request)">Issue Return</button>
+                                            <button class="btn btn-sm btn-outline-secondary ms-1" data-bs-toggle="modal"
+                                                data-bs-target="#returnDetailsModal" (click)="viewReturn(request)">View</button>
+                                        </td>
+                                    }
+                                    @case ('issued') {
+                                        <td>{{ request.pickupDate }}</td>
+                                        <td class="text-end">
+                                            <button class="btn btn-sm btn-primary" (click)="markInTransit(request)">Mark Picked Up</button>
+                                            <button class="btn btn-sm btn-outline-secondary ms-1" data-bs-toggle="modal"
+                                                data-bs-target="#returnDetailsModal" (click)="viewReturn(request)">View</button>
+                                        </td>
+                                    }
+                                    @case ('in-transit') {
+                                        <td>{{ request.trackingId }}</td>
+                                        <td class="text-end">
+                                            <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal"
+                                                data-bs-target="#returnDetailsModal" (click)="viewReturn(request)">Track Shipment</button>
+                                            <button class="btn btn-sm btn-success ms-1" (click)="markReceived(request)">Mark as Received</button>
+                                        </td>
+                                    }
+                                    @case ('inspection') {
+                                        <td><span class="badge text-bg-warning">Awaiting QC</span></td>
+                                        <td class="text-end"><button class="btn btn-sm btn-success" (click)="passInspection(request)">Pass & Initiate Refund</button><button class="btn btn-sm btn-danger ms-1" (click)="failInspection(request)">Fail QC</button></td>
+                                    }
+                                    @case ('completed') {
+                                        <td><span class="badge" [ngClass]="refundBadgeClass(request)">{{ refundStatus(request) }}</span></td>
+                                        <td class="text-end">
+                                            <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal"
+                                                data-bs-target="#returnDetailsModal" (click)="viewReturn(request)">View Details</button>
+                                        </td>
+                                    }
+                                    @case ('rejected') {
+                                        <td>{{ request.rejectionReason }}</td>
+                                        <td class="text-end">
+                                            <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal"
+                                                data-bs-target="#returnDetailsModal" (click)="viewReturn(request)">View Details</button>
+                                        </td>
+                                    }
+                                }
+                            </tr>
+                        } @empty {
+                            <tr>
+                                <td colspan="6" class="text-center text-muted py-5">
+                                    <i class="bi bi-inbox fs-3 d-block mb-2" aria-hidden="true"></i>
+                                    No return requests found.
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </section>
+
+    <div class="modal fade" id="returnRequestModal" aria-hidden="true" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <form #returnForm class="modal-content" novalidate (submit)="$event.preventDefault(); submitReturn(returnForm)">
+                <div class="modal-header">
+                    <div><div class="small text-muted">Customer return portal</div><h5 class="modal-title mb-0">Request a return</h5></div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-6"><label class="form-label">Order ID</label><input class="form-control" name="orderId" placeholder="ORD-001254" required></div>
+                        <div class="col-md-6"><label class="form-label">Product</label><input class="form-control" name="product" required></div>
+                        <div class="col-md-6"><label class="form-label">Customer name</label><input class="form-control" name="customerName" required></div>
+                        <div class="col-md-6"><label class="form-label">Email address</label><input class="form-control" type="email" name="customerEmail" required></div>
+                        <div class="col-md-6"><label class="form-label">Product SKU</label><input class="form-control" name="sku" required></div>
+                        <div class="col-md-6"><label class="form-label">Refund amount</label><input class="form-control" type="number" name="refundAmount" min="1" required></div>
+                        <div class="col-12"><label class="form-label">Reason for return</label><textarea class="form-control" name="reason" rows="2" required></textarea></div>
+                        <div class="col-12">
+                            <label class="form-label">Photos or video evidence</label>
+                            <label class="evidence-upload w-100" for="return-evidence-input">
+                                <i class="bi bi-cloud-arrow-up" aria-hidden="true"></i>
+                                <span>Attach product photos or a video</span>
+                                <small>Image and video files only</small>
+                            </label>
+                            <input id="return-evidence-input" class="visually-hidden" type="file" accept="image/*,video/*" multiple (change)="onEvidenceSelected($event)">
+                            @if (uploadError()) { <div class="invalid-feedback d-block">{{ uploadError() }}</div> }
+                            @if (uploadEvidence().length) {
+                                <div class="evidence-grid mt-2">
+                                    @for (file of uploadEvidence(); track file.name; let index = $index) {
+                                        <div class="evidence-file"><i class="bi" [ngClass]="file.type === 'image' ? 'bi-image' : 'bi-play-btn'" aria-hidden="true"></i><div class="flex-grow-1 text-truncate"><div class="fw-semibold text-truncate">{{ file.name }}</div><small>{{ file.type | titlecase }}</small></div><button type="button" class="btn btn-sm btn-outline-danger" (click)="removeUploadEvidence(index)" aria-label="Remove file"><i class="bi bi-x-lg"></i></button></div>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer"><button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button><button type="submit" class="btn btn-primary">Submit for Review</button></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- RETURN DETAILS MODAL -->
+    <div class="modal fade" id="returnDetailsModal" aria-hidden="true" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-xl">
+            @if (selectedReturn(); as request) {
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Return Request: #{{ request.id }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row g-4">
+                            <!-- Left Column: Details -->
+                            <div class="col-md-7">
+                                <h6>Order & Product</h6>
+                                <div class="d-flex align-items-center gap-3 mb-3">
+                                    <span class="td-avatar"><i class="bi bi-box-seam" aria-hidden="true"></i></span>
+                                    <div>
+                                        <p class="mb-0"><strong>Product:</strong> {{ request.product }}</p>
+                                        <p class="mb-0"><strong>SKU:</strong> {{ request.sku }}</p>
+                                        <p class="mb-0"><strong>Order ID:</strong> #{{ request.orderId }}</p>
+                                    </div>
+                                </div>
+
+                                <hr>
+
+                                <h6>Return Details</h6>
+                                <div class="p-3 bg-light rounded">
+                                    <p class="mb-0"><strong>Reason:</strong> {{ request.reason }}</p>
+                                </div>
+
+                                <h6 class="mt-4">Customer evidence</h6>
+                                <div class="evidence-grid">
+                                    @for (file of request.evidence; track file.name) {
+                                        <button type="button" class="evidence-file evidence-file-button" data-bs-toggle="modal" data-bs-target="#evidencePreviewModal" (click)="previewEvidence(file)">
+                                            <i class="bi" [ngClass]="file.type === 'image' ? 'bi-image' : 'bi-play-btn'" aria-hidden="true"></i>
+                                            <div class="text-start"><div class="fw-semibold">{{ file.name }}</div><small>{{ file.type | titlecase }} · {{ file.submittedAt }}</small></div>
+                                            <i class="bi bi-arrows-fullscreen evidence-expand" aria-hidden="true"></i>
+                                        </button>
+                                    }
+                                </div>
+                                @if (request.adminNote) { <p class="small text-muted mt-3 mb-0"><strong>Admin update:</strong> {{ request.adminNote }}</p> }
+                                @if (request.inspectionNote) { <p class="small text-muted mt-2 mb-0"><strong>Quality check:</strong> {{ request.inspectionNote }}</p> }
+
+                                @if (request.status === 'rejected') {
+                                    <div class="alert alert-danger mt-3 mb-0">
+                                        <strong>Rejection reason:</strong> {{ request.rejectionReason }}
+                                    </div>
+                                }
+
+                                <hr>
+
+                                <h6>Customer</h6>
+                                <p class="mb-0">
+                                    <strong>Name:</strong> {{ request.customerName }}<br>
+                                    <strong>Email:</strong> {{ request.customerEmail }}<br>
+                                    <strong>Refund Amount:</strong> {{ request.refundAmount | currency:'INR':'symbol':'1.2-2' }}
+                                </p>
+                            </div>
+
+                            <!-- Right Column: Timeline -->
+                            <div class="col-md-5">
+                                <h6>Return Timeline</h6>
+                                <ul class="list-unstyled mb-0">
+                                    <li class="d-flex gap-3">
+                                        <div class="d-flex flex-column align-items-center">
+                                            <i class="bi bi-check-circle-fill text-success"></i>
+                                            <div class="flex-grow-1 border-start" style="min-height: 40px;"></div>
+                                        </div>
+                                        <div>
+                                            <p class="fw-semibold mb-0">Request Submitted</p>
+                                            <p class="text-muted small">{{ request.dateSubmitted }}</p>
+                                        </div>
+                                    </li>
+                                    <li class="d-flex gap-3">
+                                        <div class="d-flex flex-column align-items-center">
+                                            <i class="bi" [ngClass]="request.status === 'rejected' ? 'bi-x-circle-fill text-danger' : (request.status !== 'pending' ? 'bi-check-circle-fill text-success' : 'bi-circle text-muted')"></i>
+                                            <div class="flex-grow-1 border-start" style="min-height: 40px;"></div>
+                                        </div>
+                                        <div>
+                                            <p class="fw-semibold mb-0" [class.text-muted]="request.status === 'pending'">
+                                                {{ request.status === 'rejected' ? 'Request Rejected' : 'Request Approved' }}
+                                            </p>
+                                        </div>
+                                    </li>
+                                    <li class="d-flex gap-3">
+                                        <div class="d-flex flex-column align-items-center">
+                                            <i class="bi" [ngClass]="['issued','in-transit','completed'].includes(request.status) ? 'bi-check-circle-fill text-success' : 'bi-circle text-muted'"></i>
+                                            <div class="flex-grow-1 border-start" style="min-height: 40px;"></div>
+                                        </div>
+                                        <div>
+                                            <p class="fw-semibold mb-0" [class.text-muted]="!['issued','in-transit','completed'].includes(request.status)">
+                                                Return Issued @if (request.trackingId) { <span class="text-muted small">({{ request.trackingId }})</span> }
+                                            </p>
+                                        </div>
+                                    </li>
+                                    <li class="d-flex gap-3">
+                                        <div class="d-flex flex-column align-items-center">
+                                            <i class="bi" [ngClass]="['inspection','completed'].includes(request.status) ? 'bi-check-circle-fill text-success' : 'bi-circle text-muted'"></i>
+                                        </div>
+                                        <div>
+                                            <p class="fw-semibold mb-0" [class.text-muted]="request.status !== 'completed'">
+                                                {{ request.status === 'completed' ? refundStatus(request) : 'Refund Initiated' }}
+                                            </p>
+                                            @if (request.refundPaymentId) {
+                                                <p class="text-muted small mb-0">Transaction: {{ request.refundPaymentId }}</p>
+                                            }
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer justify-content-between">
+                        <div>
+                            @if (request.status === 'pending') {
+                                <button type="button" class="btn btn-danger" data-bs-dismiss="modal" (click)="reject(request)">
+                                    <i class="bi bi-x-circle"></i> Reject Request
+                                </button>
+                            }
+                        </div>
+                        <div>
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                            @if (request.status === 'pending') {
+                                <button type="button" class="btn btn-success" data-bs-dismiss="modal" (click)="approve(request)">
+                                    <i class="bi bi-check-circle"></i> Approve Request
+                                </button>
+                            }
+                            @if (request.status === 'approved') {
+                                <button type="button" class="btn btn-primary" data-bs-dismiss="modal" (click)="issueReturn(request)">
+                                    <i class="bi bi-box-arrow-up-right"></i> Issue Return
+                                </button>
+                            }
+                            @if (request.status === 'issued') {
+                                <button type="button" class="btn btn-primary" data-bs-dismiss="modal" (click)="markInTransit(request)">
+                                    <i class="bi bi-truck"></i> Mark Picked Up
+                                </button>
+                            }
+                            @if (request.status === 'in-transit') {
+                                <button type="button" class="btn btn-primary" data-bs-dismiss="modal" (click)="markReceived(request)">
+                                    <i class="bi bi-clipboard2-check"></i> Mark Received for QC
+                                </button>
+                            }
+                            @if (request.status === 'inspection') {
+                                <button type="button" class="btn btn-success" data-bs-dismiss="modal" (click)="passInspection(request)"><i class="bi bi-currency-rupee"></i> Pass QC & Refund</button>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="modal fade" id="evidencePreviewModal" aria-hidden="true" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-xl">
+            @if (selectedEvidence(); as evidence) {
+                <div class="modal-content evidence-preview-modal">
+                    <div class="modal-header"><div><div class="small text-muted">Customer-submitted {{ evidence.type }}</div><h5 class="modal-title mb-0">{{ evidence.name }}</h5></div><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+                    <div class="modal-body evidence-preview-body">
+                        @if (evidence.previewUrl && evidence.type === 'image') {
+                            <img [src]="evidence.previewUrl" [alt]="evidence.name" class="evidence-preview-media">
+                        } @else if (evidence.previewUrl && evidence.type === 'video') {
+                            <video [src]="evidence.previewUrl" class="evidence-preview-media" controls></video>
+                        } @else {
+                            <div class="evidence-preview-unavailable"><i class="bi" [ngClass]="evidence.type === 'image' ? 'bi-image' : 'bi-play-btn'" aria-hidden="true"></i><strong>{{ evidence.type | titlecase }} submitted for review</strong><span>{{ evidence.name }}</span><small>The seeded demo record has file metadata only. New uploads open here with a full preview.</small></div>
+                        }
+                    </div>
+                    <div class="modal-footer"><span class="small text-muted me-auto">Submitted {{ evidence.submittedAt }}</span><button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button></div>
+                </div>
+            }
+        </div>
+    </div>
+</div>

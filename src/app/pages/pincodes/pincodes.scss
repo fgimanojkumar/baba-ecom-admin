@@ -1,0 +1,8 @@
+.table-search { min-width: 220px; }
+.filters-row { width: 100%; justify-content: flex-end; }
+.state-filter { min-width: 180px; width: auto; }
+
+@media (max-width: 767.98px) {
+  .filters-row { flex-direction: column; align-items: stretch; }
+  .state-filter, .table-search { width: 100%; min-width: 0; }
+}

@@ -1,0 +1,140 @@
+<div class="container-fluid px-3 px-lg-4 py-4">
+    <!-- PAGE HEADING -->
+    <div class="page-heading">
+        <div class="page-heading-copy">
+            <span class="page-icon"><i class="bi bi-graph-up-arrow" aria-hidden="true"></i></span>
+            <div>
+                <h1 class="h5 mb-1 d-flex align-items-center gap-2">Reports & Analytics <app-page-info heading="Reports & Analytics" text="Platform-wide analytics covering revenue trends, order status split, top sellers, and top categories, with GST report export."></app-page-info></h1>
+                <p class="text-muted mb-0">Platform-wide performance across revenue, sellers, and catalog.</p>
+            </div>
+        </div>
+        <div class="heading-actions">
+            <button class="btn btn-outline-secondary btn-sm" (click)="exportGstReportCsv()">
+                <i class="bi bi-download" aria-hidden="true"></i>
+                Export GST/Tax Report
+            </button>
+        </div>
+    </div>
+
+    <!-- SUMMARY -->
+    <section class="row g-3 mt-1" aria-label="Report summary">
+        <div class="col-12 col-sm-6 col-xl-3">
+            <article class="metric-card metric-primary">
+                <div class="metric-top">
+                    <span class="metric-label">Total Revenue</span>
+                    <span class="metric-icon"><i class="bi bi-currency-rupee" aria-hidden="true"></i></span>
+                </div>
+                <div class="metric-value">₹{{ totalRevenue() | number }}</div>
+            </article>
+        </div>
+        <div class="col-12 col-sm-6 col-xl-3">
+            <article class="metric-card metric-success">
+                <div class="metric-top">
+                    <span class="metric-label">Seller Payouts</span>
+                    <span class="metric-icon"><i class="bi bi-cash-stack" aria-hidden="true"></i></span>
+                </div>
+                <div class="metric-value">₹{{ totalPayouts() | number }}</div>
+            </article>
+        </div>
+        <div class="col-12 col-sm-6 col-xl-3">
+            <article class="metric-card metric-warning">
+                <div class="metric-top">
+                    <span class="metric-label">Total Sellers</span>
+                    <span class="metric-icon"><i class="bi bi-shop" aria-hidden="true"></i></span>
+                </div>
+                <div class="metric-value">{{ totalSellers() }}</div>
+            </article>
+        </div>
+        <div class="col-12 col-sm-6 col-xl-3">
+            <article class="metric-card metric-danger">
+                <div class="metric-top">
+                    <span class="metric-label">Total Customers</span>
+                    <span class="metric-icon"><i class="bi bi-people" aria-hidden="true"></i></span>
+                </div>
+                <div class="metric-value">{{ totalCustomers() }}</div>
+            </article>
+        </div>
+    </section>
+
+    <!-- CHARTS -->
+    <section class="row g-3 mt-1">
+        <div class="col-12 col-xl-7">
+            <div class="panel chart-card">
+                <div class="panel-header">
+                    <h2 class="h5 mb-1 section-title"><i class="bi bi-bar-chart-line" aria-hidden="true"></i> Revenue Trend</h2>
+                </div>
+                <div class="chart-canvas-wrap">
+                    <canvas id="revenueTrendChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-xl-5">
+            <div class="panel chart-card">
+                <div class="panel-header">
+                    <h2 class="h5 mb-1 section-title"><i class="bi bi-pie-chart" aria-hidden="true"></i> Order Status Split</h2>
+                </div>
+                <div class="chart-canvas-wrap">
+                    <canvas id="orderStatusChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- TOP SELLERS / TOP CATEGORIES -->
+    <section class="row g-3 mt-1">
+        <div class="col-12 col-xl-6">
+            <div class="panel">
+                <div class="panel-header">
+                    <h2 class="h5 mb-1 section-title"><i class="bi bi-trophy" aria-hidden="true"></i> Top Sellers</h2>
+                </div>
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th scope="col">Seller</th>
+                                <th scope="col">Orders</th>
+                                <th scope="col">Products</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (seller of topSellers(); track seller.id) {
+                                <tr>
+                                    <td class="fw-semibold">{{ seller.businessName }}</td>
+                                    <td>{{ seller.totalOrders }}</td>
+                                    <td>{{ seller.totalProducts }}</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-xl-6">
+            <div class="panel">
+                <div class="panel-header">
+                    <h2 class="h5 mb-1 section-title"><i class="bi bi-flower1" aria-hidden="true"></i> Top Categories</h2>
+                </div>
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th scope="col">Category</th>
+                                <th scope="col">Products</th>
+                                <th scope="col">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (category of topCategories(); track category.id) {
+                                <tr>
+                                    <td class="fw-semibold">{{ category.name }}</td>
+                                    <td>{{ category.productCount }}</td>
+                                    <td><span class="badge" [ngClass]="category.status === 'Active' ? 'text-bg-success' : 'text-bg-secondary'">{{ category.status }}</span></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
