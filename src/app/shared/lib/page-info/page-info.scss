@@ -1,0 +1,21 @@
+.page-info-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: none;
+  background: rgba(99, 102, 241, 0.12);
+  color: #6366f1;
+  border-radius: 50%;
+  font-size: 0.8rem;
+  line-height: 1;
+  transition: background 0.16s ease, color 0.16s ease;
+}
+
+.page-info-btn:hover,
+.page-info-btn:focus {
+  background: #6366f1;
+  color: #fff;
+}
